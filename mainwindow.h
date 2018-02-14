@@ -15,6 +15,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void _read();
     void _run() const;
 
 private:
@@ -22,6 +23,7 @@ private:
     void _create_menus();
 
     QMenu*   _file_menu;
+    QAction* _read_act;
     QAction* _run_act;
 
 };

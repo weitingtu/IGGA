@@ -26,8 +26,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += main.cpp\
         mainwindow.cpp \
     factory.cpp \
-    job.cpp
+    job.cpp \
+    reader.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
-    job.h
+    job.h \
+    reader.h

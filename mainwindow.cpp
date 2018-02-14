@@ -1,12 +1,15 @@
 #include "mainwindow.h"
 #include "factory.h"
 #include "job.h"
+#include "reader.h"
 #include <QAction>
 #include <QMenuBar>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       _file_menu(nullptr),
+      _read_act(nullptr),
       _run_act(nullptr)
 {
     _create_actions();
@@ -20,14 +23,30 @@ MainWindow::~MainWindow()
 
 void MainWindow::_create_actions()
 {
-    _run_act = new QAction(tr("&Run"), this);
+    _read_act = new QAction(tr("&Read"), this);
+    connect(_read_act, SIGNAL(triggered(bool)), this, SLOT(_read()));
+    _run_act = new QAction(tr("Run"), this);
     connect(_run_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
 }
 
 void MainWindow::_create_menus()
 {
     _file_menu = menuBar()->addMenu(tr("File"));
+    _file_menu->addAction(_read_act);
+    _file_menu->addSeparator();
     _file_menu->addAction(_run_act);
+}
+
+void MainWindow::_read()
+{
+    QString file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Test Files (*.txt)"));
+    if(file_name.isEmpty())
+    {
+        return;
+    }
+
+    Reader r;
+    r.read(file_name.toLatin1().data());
 }
 
 void MainWindow::_run() const
