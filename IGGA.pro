@@ -27,9 +27,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     factory.cpp \
     job.cpp \
-    reader.cpp
+    reader.cpp \
+    ph1.cpp \
+    neh.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
     job.h \
-    reader.h
+    reader.h \
+    ph1.h \
+    neh.h

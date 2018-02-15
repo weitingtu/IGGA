@@ -4,45 +4,69 @@
 #include <QtGlobal>
 
 Factory::Factory(unsigned num_of_machine):
-    machine_times(num_of_machine)
+    _machine_times(num_of_machine, 0)
 {
-
 }
 
-unsigned Factory::add_job(const Job& job)
+void Factory::print() const
 {
-    if(job.processing_times.size() != machine_times.size())
+    for(const Job& job : _jobs)
+    {
+        printf("Job %u ", job.id);
+        for(auto i : job.machine_times)
+        {
+            printf("%u ", i);
+        }
+        printf("\n");
+    }
+}
+
+unsigned Factory::_add_job(const Job& new_job)
+{
+    if(new_job.processing_times.size() != _machine_times.size())
     {
         printf("Job processing times size %zu and machine times size %zu mismatch\n",
-               job.processing_times.size(),
-               machine_times.size());
+               new_job.processing_times.size(),
+               _machine_times.size());
         Q_ASSERT(0);
         return 0;
     }
-    unsigned total_time = machine_times.at(0);
-    std::vector<unsigned> job_machine_times;
+
+    _jobs.push_back(new_job);
+    Job& job = _jobs.back();
+    job.machine_times.clear();
+
+    unsigned total_time = _machine_times.at(0);
     for(size_t i = 0; i < job.processing_times.size(); ++i)
     {
         total_time += job.processing_times[i];
-        job_machine_times.push_back(total_time);
+        job.machine_times.push_back(total_time);
     }
 
-    for(size_t i = 0; i < job_machine_times.size() - 1;++i)
+    for(size_t i = 0; i < job.machine_times.size() - 1;++i)
     {
-        if(job_machine_times[i] >= machine_times.at(i + 1))
+        if(job.machine_times[i] >= _machine_times.at(i + 1))
         {
             continue;
         }
-        unsigned shift = machine_times.at(i + 1) - job_machine_times[i];
-        std::transform(job_machine_times.begin(), job_machine_times.end(),
-                       job_machine_times.begin(), bind2nd(std::plus<unsigned>(), shift));
+        unsigned shift = _machine_times.at(i + 1) - job.machine_times[i];
+        std::transform(job.machine_times.begin(), job.machine_times.end(),
+                       job.machine_times.begin(), bind2nd(std::plus<unsigned>(), shift));
 
     }
-    for(auto i : job_machine_times)
+    _machine_times = job.machine_times;
+    return _machine_times.back();
+}
+
+unsigned Factory::add_jobs(const std::vector<Job>& jobs)
+{
+    _jobs.clear();
+    std::fill( _machine_times.begin(), _machine_times.end(), 0);
+
+    unsigned cost = 0;
+    for(size_t i = 0; i < jobs.size(); ++i)
     {
-        printf("%u ", i);
+        cost += _add_job(jobs[i]);
     }
-    printf("\n");
-    machine_times = job_machine_times;
-    return machine_times.back();
+    return cost;
 }

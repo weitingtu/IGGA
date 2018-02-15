@@ -36,7 +36,7 @@ bool Reader::read(char* path)
     if(!ifs.good())
     {
         printf("failed to open %s\n", path);
-        return;
+        return false;
     }
 
     std::string line;
@@ -70,6 +70,10 @@ bool Reader::read(char* path)
             }
             read_job = true;
             _jobs.push_back(std::vector<Job>(num_jobs));
+            for(size_t i = 0; i < _jobs.back().size(); ++i)
+            {
+                _jobs.back().at(i).id = i;
+            }
             _factories.push_back(Factory(num_machines));
             continue;
         }
