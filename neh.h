@@ -11,6 +11,7 @@ public:
     NEH(const std::vector<Job>& jobs, const Factory& factory);
 
     void run();
+    Jobs run(const Jobs& pi1);
 private:
     std::vector<Job> _jobs;
     Factory          _factory;

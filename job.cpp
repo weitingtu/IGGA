@@ -1,4 +1,5 @@
 #include "job.h"
+#include <stdio.h>
 
 Job::Job():
     id(0),
@@ -6,7 +7,6 @@ Job::Job():
     machine_times(),
     _sum(0)
 {
-
 }
 
 unsigned Job::get_sum() const
@@ -16,4 +16,17 @@ unsigned Job::get_sum() const
         _sum = std::accumulate(processing_times.begin(),processing_times.end(),0);
     }
     return _sum;
+}
+
+void print_jobs(const Jobs& jobs)
+{
+    for(const Job& job : jobs)
+    {
+        printf("Job %u ", job.id);
+        for(auto i : job.machine_times)
+        {
+            printf("%u ", i);
+        }
+        printf("\n");
+    }
 }

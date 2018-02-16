@@ -70,3 +70,13 @@ unsigned Factory::add_jobs(const std::vector<Job>& jobs)
     }
     return cost;
 }
+
+unsigned Factory::get_cost() const
+{
+    unsigned cost = 0;
+    for(size_t i = 0; i < _jobs.size(); ++i)
+    {
+        cost += _jobs[i].machine_times.back();
+    }
+    return cost;
+}

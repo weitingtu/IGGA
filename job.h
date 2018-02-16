@@ -30,4 +30,8 @@ private:
     mutable unsigned _sum;
 };
 
+using Jobs = std::vector<Job>;
+
+void print_jobs(const Jobs& jobs );
+
 #endif // JOB_H

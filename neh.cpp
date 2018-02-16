@@ -18,6 +18,11 @@ void NEH::run()
     std::vector<Job> pi1 = _jobs;
     std::sort(pi1.begin(), pi1.end(), greater());
 
+    run(pi1);
+}
+
+Jobs NEH::run(const Jobs& pi1)
+{
     std::vector<Job> pi2;
     for(size_t i = 0; i < pi1.size(); ++i)
     {
@@ -30,7 +35,7 @@ void NEH::run()
             tmp.insert(ite, pi1[i]);
 
             _factory.add_jobs(tmp);
-            unsigned cost = _factory.get_markspan();
+            unsigned cost = _factory.get_cost();
 
             if(cost < min_cost)
             {
@@ -47,4 +52,6 @@ void NEH::run()
     }
     _factory.add_jobs(pi2);
     _factory.print();
+
+    return pi2;
 }

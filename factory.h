@@ -12,6 +12,7 @@ public:
     unsigned add_jobs(const std::vector<Job>& jobs);
     void print() const;
     unsigned get_markspan() const { return _machine_times.back(); }
+    unsigned get_cost() const;
 
 private:
     unsigned _add_job(const Job& new_job);

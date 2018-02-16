@@ -23,6 +23,7 @@ private:
     void _create_menus();
     void _test_cost_function() const;
     void _test_neh() const;
+    void _test_ph1() const;
 
     QMenu*   _file_menu;
     QAction* _read_act;
