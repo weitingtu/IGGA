@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     reader.cpp \
     ph1.cpp \
     neh.cpp \
-    fnm.cpp
+    fnm.cpp \
+    ls.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -39,4 +40,5 @@ HEADERS  += mainwindow.h \
     ph1.h \
     neh.h \
     fnm.h \
-    utils.h
+    utils.h \
+    ls.h

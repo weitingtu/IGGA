@@ -13,6 +13,7 @@ public:
     void print() const;
     unsigned get_markspan() const { return _machine_times.back(); }
     unsigned get_cost() const;
+    size_t get_machine_size() const { return _machine_times.size(); }
 
 private:
     unsigned _add_job(const Job& new_job);

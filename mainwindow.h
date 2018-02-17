@@ -25,6 +25,7 @@ private:
     void _test_neh() const;
     void _test_ph1() const;
     void _test_fnm() const;
+    void _test_ls() const;
 
     QMenu*   _file_menu;
     QAction* _read_act;

@@ -19,6 +19,7 @@ void Factory::print() const
         }
         printf("\n");
     }
+    printf("cost %u\n", get_cost());
 }
 
 unsigned Factory::_add_job(const Job& new_job)

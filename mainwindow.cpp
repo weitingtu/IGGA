@@ -5,6 +5,7 @@
 #include "neh.h"
 #include "ph1.h"
 #include "fnm.h"
+#include "ls.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -54,7 +55,7 @@ void MainWindow::_read()
 
 void MainWindow::_run() const
 {
-    _test_fnm();
+    _test_ls();
 }
 
 void MainWindow::_test_cost_function() const
@@ -143,4 +144,27 @@ void MainWindow::_test_fnm() const
 
     FNM fnm({j0, j1, j2, j3, j4}, f);
     fnm.run();
+}
+
+void MainWindow::_test_ls() const
+{
+    Factory f(5);
+    Job j0;
+    j0.id = 0;
+    j0.processing_times = {  2,  5,  6,  8,  7 };
+    Job j1;
+    j1.id = 1;
+    j1.processing_times = {  3,  7,  2, 10,  4 };
+    Job j2;
+    j2.id = 2;
+    j2.processing_times = {  1,  2,  7,  6,  3 };
+    Job j3;
+    j3.id = 3;
+    j3.processing_times = {  4,  9,  5,  7,  8 };
+    Job j4;
+    j4.id = 4;
+    j4.processing_times = {  6,  8,  4,  5,  6 };
+
+    LS ls({j0, j1, j2, j3, j4}, f);
+    ls.run();
 }
