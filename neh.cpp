@@ -1,11 +1,6 @@
 #include "neh.h"
+#include "utils.h"
 #include <algorithm>
-
-struct greater
-{
-    template<class T>
-    bool operator()(T const &a, T const &b) const { return a > b; }
-};
 
 NEH::NEH(const std::vector<Job> &jobs, const Factory &factory):
     _jobs(jobs),
