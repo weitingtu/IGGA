@@ -2,7 +2,7 @@
 #include "utils.h"
 #include <algorithm>
 
-NEH::NEH(const std::vector<Job> &jobs, const Factory &factory):
+NEH::NEH(const Jobs &jobs, const Factory &factory):
     _jobs(jobs),
     _factory(factory)
 {
@@ -10,7 +10,7 @@ NEH::NEH(const std::vector<Job> &jobs, const Factory &factory):
 
 void NEH::run()
 {
-    std::vector<Job> pi1 = _jobs;
+    Jobs pi1 = _jobs;
     std::sort(pi1.begin(), pi1.end(), greater());
 
     run(pi1);
@@ -18,14 +18,14 @@ void NEH::run()
 
 Jobs NEH::run(const Jobs& pi1)
 {
-    std::vector<Job> pi2;
+    Jobs pi2;
     for(size_t i = 0; i < pi1.size(); ++i)
     {
-        std::vector<Job> best;
+        Jobs best;
         unsigned min_cost = std::numeric_limits<unsigned>::max();
         for(size_t pos = 0; ;++pos)
         {
-            std::vector<Job> tmp = pi2;
+            Jobs tmp = pi2;
             auto ite = tmp.begin() + pos;
             tmp.insert(ite, pi1[i]);
 

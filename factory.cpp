@@ -59,7 +59,7 @@ unsigned Factory::_add_job(const Job& new_job)
     return _machine_times.back();
 }
 
-unsigned Factory::add_jobs(const std::vector<Job>& jobs)
+unsigned Factory::add_jobs(const Jobs &jobs)
 {
     _jobs.clear();
     std::fill( _machine_times.begin(), _machine_times.end(), 0);
