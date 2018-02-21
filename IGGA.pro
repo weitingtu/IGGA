@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     ls.cpp \
     cfi.cpp \
     ioApi.cpp \
-    cdjs.cpp
+    cdjs.cpp \
+    ris.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -47,4 +48,5 @@ HEADERS  += mainwindow.h \
     ls.h \
     cfi.h \
     ioApi.h \
-    cdjs.h
+    cdjs.h \
+    ris.h
