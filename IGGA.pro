@@ -31,7 +31,9 @@ SOURCES += main.cpp\
     ph1.cpp \
     neh.cpp \
     fnm.cpp \
-    ls.cpp
+    ls.cpp \
+    cfi.cpp \
+    ioApi.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -41,4 +43,6 @@ HEADERS  += mainwindow.h \
     neh.h \
     fnm.h \
     utils.h \
-    ls.h
+    ls.h \
+    cfi.h \
+    ioApi.h

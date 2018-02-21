@@ -17,6 +17,7 @@ public:
 private slots:
     void _read();
     void _run() const;
+    void _verbose(bool checked) const;
 
 private:
     void _create_actions();
@@ -26,10 +27,12 @@ private:
     void _test_ph1() const;
     void _test_fnm() const;
     void _test_ls() const;
+    void _test_cfi() const;
 
     QMenu*   _file_menu;
     QAction* _read_act;
     QAction* _run_act;
+    QAction* _verbose_act;
 
 };
 

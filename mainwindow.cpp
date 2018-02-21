@@ -6,6 +6,8 @@
 #include "ph1.h"
 #include "fnm.h"
 #include "ls.h"
+#include "cfi.h"
+#include "ioApi.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -14,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       _file_menu(nullptr),
       _read_act(nullptr),
-      _run_act(nullptr)
+      _run_act(nullptr),
+      _verbose_act(nullptr)
 {
     _create_actions();
     _create_menus();
@@ -31,6 +34,9 @@ void MainWindow::_create_actions()
     connect(_read_act, SIGNAL(triggered(bool)), this, SLOT(_read()));
     _run_act = new QAction(tr("R&un"), this);
     connect(_run_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _verbose_act = new QAction(tr("Verbose"), this);
+    _verbose_act->setCheckable(true);
+    connect(_verbose_act, SIGNAL(triggered(bool)), this, SLOT(_verbose(bool)));
 }
 
 void MainWindow::_create_menus()
@@ -39,6 +45,8 @@ void MainWindow::_create_menus()
     _file_menu->addAction(_read_act);
     _file_menu->addSeparator();
     _file_menu->addAction(_run_act);
+    _file_menu->addSeparator();
+    _file_menu->addAction(_verbose_act);
 }
 
 void MainWindow::_read()
@@ -55,7 +63,7 @@ void MainWindow::_read()
 
 void MainWindow::_run() const
 {
-    _test_ls();
+    _test_cfi();
 }
 
 void MainWindow::_test_cost_function() const
@@ -167,4 +175,32 @@ void MainWindow::_test_ls() const
 
     LS ls({j0, j1, j2, j3, j4}, f);
     ls.run();
+}
+
+void MainWindow::_test_cfi() const
+{
+    Factory f(4);
+    Job j0;
+    j0.id = 0;
+    j0.processing_times = { 12, 24, 12, 13 };
+    Job j1;
+    j1.id = 1;
+    j1.processing_times = { 20,  3, 19, 11 };
+    Job j2;
+    j2.id = 2;
+    j2.processing_times = { 19, 20,  3, 15 };
+    Job j3;
+    j3.id = 3;
+    j3.processing_times = { 14, 23, 16, 14 };
+    Job j4;
+    j4.id = 4;
+    j4.processing_times = { 19, 15, 17, 22 };
+
+    CFI cfi({j0, j1, j2, j3, j4}, f);
+    cfi.run();
+}
+
+void MainWindow::_verbose(bool checked) const
+{
+    io::set_debug(checked);
 }

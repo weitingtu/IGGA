@@ -65,6 +65,7 @@ Jobs PH1::_neh(Jobs pi)
     unsigned r = 1;
     while(r <= _r_max)
     {
+       ++r;
        pi = neh.run( pi );
        _factory.add_jobs( pi );
        unsigned cost = _factory.get_cost();

@@ -9,6 +9,14 @@ Job::Job():
 {
 }
 
+Job::Job(size_t m):
+    id(0),
+    processing_times(m, 0),
+    machine_times(m, 0),
+    _sum(0)
+{
+}
+
 unsigned Job::get_sum() const
 {
     if(0 == _sum)
