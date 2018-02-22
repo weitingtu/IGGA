@@ -7,10 +7,32 @@
 #include "fnm.h"
 #include "ls.h"
 #include "cfi.h"
+#include "ris.h"
 #include "ioApi.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
+
+static Jobs _creat_test_jobs()
+{
+    Job j0;
+    j0.id = 0;
+    j0.processing_times = { 12, 24, 12, 13 };
+    Job j1;
+    j1.id = 1;
+    j1.processing_times = { 20,  3, 19, 11 };
+    Job j2;
+    j2.id = 2;
+    j2.processing_times = { 19, 20,  3, 15 };
+    Job j3;
+    j3.id = 3;
+    j3.processing_times = { 14, 23, 16, 14 };
+    Job j4;
+    j4.id = 4;
+    j4.processing_times = { 19, 15, 17, 22 };
+
+    return {j0, j1, j2, j3, j4};
+}
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -63,28 +85,15 @@ void MainWindow::_read()
 
 void MainWindow::_run() const
 {
-    _test_cfi();
+    _test_ris();
 }
 
 void MainWindow::_test_cost_function() const
 {
-    Factory f(4);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = {19, 20,  3, 15};
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = {12, 24, 12, 13};
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = {20,  3, 19, 11};
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = {14, 23, 16, 14};
-    Job j4;
-    j4.id = 4;
-    j4.processing_times = {19, 15, 17, 22};
-    f.add_jobs({j0, j1, j2, j3, j4});
+    Jobs jobs = _creat_test_jobs();
+    Factory f(jobs.at(0).processing_times.size());
+
+    f.add_jobs(jobs);
     f.print();
 }
 
@@ -110,47 +119,19 @@ void MainWindow::_test_neh() const
 
 void MainWindow::_test_ph1() const
 {
-    Factory f(4);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = { 12, 24, 12, 13 };
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = { 20,  3, 19, 11 };
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = { 19, 20,  3, 15 };
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = { 14, 23, 16, 14 };
-    Job j4;
-    j4.id = 4;
-    j4.processing_times = { 19, 15, 17, 22 };
+    Jobs jobs = _creat_test_jobs();
+    Factory f(jobs.at(0).processing_times.size());
 
-    PH1 ph1({j0, j1, j2, j3, j4}, f);
+    PH1 ph1(jobs, f);
     ph1.run();
 }
 
 void MainWindow::_test_fnm() const
 {
-    Factory f(4);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = { 12, 24, 12, 13 };
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = { 20,  3, 19, 11 };
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = { 19, 20,  3, 15 };
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = { 14, 23, 16, 14 };
-    Job j4;
-    j4.id = 4;
-    j4.processing_times = { 19, 15, 17, 22 };
+    Jobs jobs = _creat_test_jobs();
+    Factory f(jobs.at(0).processing_times.size());
 
-    FNM fnm({j0, j1, j2, j3, j4}, f);
+    FNM fnm(jobs, f);
     fnm.run();
 }
 
@@ -179,25 +160,22 @@ void MainWindow::_test_ls() const
 
 void MainWindow::_test_cfi() const
 {
-    Factory f(4);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = { 12, 24, 12, 13 };
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = { 20,  3, 19, 11 };
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = { 19, 20,  3, 15 };
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = { 14, 23, 16, 14 };
-    Job j4;
-    j4.id = 4;
-    j4.processing_times = { 19, 15, 17, 22 };
+    Jobs jobs = _creat_test_jobs();
+    Factory f(jobs.at(0).processing_times.size());
 
-    CFI cfi({j0, j1, j2, j3, j4}, f);
+    CFI cfi(jobs, f);
     cfi.run();
+}
+
+void MainWindow::_test_ris() const
+{
+    Jobs jobs = _creat_test_jobs();
+    Factory f(jobs.at(0).processing_times.size());
+
+    Jobs pi_new  = {jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3), jobs.at(2)}; // 2, 1, 5, 4, 3
+    Jobs pi_best = {jobs.at(2), jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3)}; // 3, 2, 1, 5, 4
+    RIS ris(pi_new, pi_best, f);
+    ris.run();
 }
 
 void MainWindow::_verbose(bool checked) const

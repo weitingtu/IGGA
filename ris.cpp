@@ -46,7 +46,7 @@ void RIS::run()
             }
             else
             {
-                pi_new.push_back(j);
+                pi_new.push_back(job);
             }
         }
 

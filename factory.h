@@ -7,7 +7,7 @@
 class Factory
 {
 public:
-    Factory(unsigned num_of_machine);
+    explicit Factory(unsigned num_of_machine);
 
     unsigned add_jobs(const Jobs& jobs);
     void print() const;

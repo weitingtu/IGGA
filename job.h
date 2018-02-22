@@ -9,7 +9,7 @@ class Job
 {
 public:
     Job();
-    Job(size_t m);
+    explicit Job(size_t m);
 
     unsigned get_sum() const;
 
