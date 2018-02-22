@@ -28,6 +28,7 @@ private:
     void _test_fnm() const;
     void _test_ls() const;
     void _test_cfi() const;
+    void _test_cdjs() const;
     void _test_ris() const;
 
     QMenu*   _file_menu;

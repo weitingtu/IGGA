@@ -7,6 +7,7 @@
 #include "fnm.h"
 #include "ls.h"
 #include "cfi.h"
+#include "cdjs.h"
 #include "ris.h"
 #include "ioApi.h"
 #include <QAction>
@@ -85,7 +86,7 @@ void MainWindow::_read()
 
 void MainWindow::_run() const
 {
-    _test_ris();
+    _test_cdjs();
 }
 
 void MainWindow::_test_cost_function() const
@@ -165,6 +166,20 @@ void MainWindow::_test_cfi() const
 
     CFI cfi(jobs, f);
     cfi.run();
+}
+
+void MainWindow::_test_cdjs() const
+{
+    Jobs jobs = _creat_test_jobs();
+    Job j5;
+    j5.id = 5;
+    j5.processing_times = { 12, 14, 15, 11 };
+    jobs.push_back(j5);
+    Factory f(jobs.at(0).processing_times.size());
+
+    Jobs pi_best {jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3), jobs.at(2), jobs.at(5)}; // 2, 1, 5, 4, 3, 6
+    CDJS cdjs(pi_best, f);
+    cdjs.run();
 }
 
 void MainWindow::_test_ris() const
