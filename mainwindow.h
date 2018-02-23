@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "reader.h"
 
 class QAction;
 class QMenu;
@@ -15,7 +16,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void _read();
+    void _open();
     void _run() const;
     void _verbose(bool checked) const;
 
@@ -32,9 +33,11 @@ private:
     void _test_ris() const;
 
     QMenu*   _file_menu;
-    QAction* _read_act;
-    QAction* _run_act;
+    QMenu*   _run_menu;
+    QAction* _open_act;
+    QAction* _cfi_act;
     QAction* _verbose_act;
+    Reader _r;
 
 };
 

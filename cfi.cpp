@@ -2,6 +2,7 @@
 #include "neh.h"
 #include <algorithm>
 #include <QtGlobal>
+#include "ioApi.h"
 
 CFI::CFI(const Jobs &jobs, const Factory &factory):
     _jobs(jobs),
@@ -98,7 +99,7 @@ Jobs CFI::_isa()
     std::set<unsigned> job_set;
     while(pi.size() < _jobs.size() - 1)
     {
-//        printf("Iteration %zu\n", pi.size());
+        io_debug("Iteration %d\n", (int)pi.size());
         unsigned min_job_idx              = std::numeric_limits<unsigned>::max();
         unsigned min_index_function_value = std::numeric_limits<unsigned>::max();
         for(size_t i = 0; i < _jobs.size(); ++i)
@@ -108,14 +109,14 @@ Jobs CFI::_isa()
                 continue;
             }
             unsigned index_function_value = _get_index_function_value(pi, i);
-//            printf("f(%u) = %u %f\n", i, index_function_value, (double)index_function_value / (_jobs.size() - pi.size() - 1));
+            io_debug("f(%u) = %u %f\n", i, index_function_value, (double)index_function_value / (_jobs.size() - pi.size() - 1));
             if(index_function_value < min_index_function_value)
             {
                 min_index_function_value = index_function_value;
                 min_job_idx = i;
             }
         }
-//        printf("min f(%u) = %u %f\n", min_job_idx, min_index_function_value, (double) min_index_function_value / (_jobs.size() - pi.size() - 1));
+        io_debug("min f(%u) = %u %f\n", min_job_idx, min_index_function_value, (double) min_index_function_value / (_jobs.size() - pi.size() - 1));
         pi.push_back(_jobs.at(min_job_idx));
         job_set.insert(min_job_idx);
     }
@@ -169,4 +170,5 @@ void CFI::run()
     pi = _neh(pi);
     _factory.add_jobs(pi);
     _factory.print();
+    _jobs = _factory.get_jobs();
 }

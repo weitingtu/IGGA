@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "factory.h"
 #include "job.h"
-#include "reader.h"
 #include "neh.h"
 #include "ph1.h"
 #include "fnm.h"
@@ -10,6 +9,7 @@
 #include "cdjs.h"
 #include "ris.h"
 #include "ioApi.h"
+#include "writer.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -38,9 +38,11 @@ static Jobs _creat_test_jobs()
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
       _file_menu(nullptr),
-      _read_act(nullptr),
-      _run_act(nullptr),
-      _verbose_act(nullptr)
+      _run_menu(nullptr),
+      _open_act(nullptr),
+      _cfi_act(nullptr),
+      _verbose_act(nullptr),
+      _r()
 {
     _create_actions();
     _create_menus();
@@ -53,10 +55,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::_create_actions()
 {
-    _read_act = new QAction(tr("&Read"), this);
-    connect(_read_act, SIGNAL(triggered(bool)), this, SLOT(_read()));
-    _run_act = new QAction(tr("R&un"), this);
-    connect(_run_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _open_act = new QAction(tr("&Open"), this);
+    connect(_open_act, SIGNAL(triggered(bool)), this, SLOT(_open()));
+    _cfi_act = new QAction(tr("CFI"), this);
+    connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _verbose_act = new QAction(tr("Verbose"), this);
     _verbose_act->setCheckable(true);
     connect(_verbose_act, SIGNAL(triggered(bool)), this, SLOT(_verbose(bool)));
@@ -65,14 +67,14 @@ void MainWindow::_create_actions()
 void MainWindow::_create_menus()
 {
     _file_menu = menuBar()->addMenu(tr("&File"));
-    _file_menu->addAction(_read_act);
-    _file_menu->addSeparator();
-    _file_menu->addAction(_run_act);
+    _file_menu->addAction(_open_act);
     _file_menu->addSeparator();
     _file_menu->addAction(_verbose_act);
+    _run_menu = menuBar()->addMenu(tr("&Run"));
+    _run_menu->addAction(_cfi_act);
 }
 
-void MainWindow::_read()
+void MainWindow::_open()
 {
     QString file_name = QFileDialog::getOpenFileName(this, tr("Open File"), "", tr("Test Files (*.txt)"));
     if(file_name.isEmpty())
@@ -80,13 +82,31 @@ void MainWindow::_read()
         return;
     }
 
-    Reader r;
-    r.read(file_name.toLatin1().data());
+    _r.read(file_name.toLatin1().data());
 }
 
 void MainWindow::_run() const
 {
-    _test_cdjs();
+    QObject* s = sender();
+
+    if(_r.empty())
+    {
+        printf("warn: jobs and factory are empty. Please read case first\n");
+        return;
+    }
+    std::vector<Jobs> job_sets;
+    if(s == _cfi_act)
+    {
+        for(size_t i = 0; i < _r.size();++i)
+        {
+            CFI cfi(_r.get_jobs(i), _r.get_factory(i));
+            cfi.run();
+            job_sets.push_back(cfi.get_result());
+        }
+    }
+
+    Writer w;
+    w.write("out.csv", job_sets);
 }
 
 void MainWindow::_test_cost_function() const

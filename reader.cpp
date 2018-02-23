@@ -6,7 +6,7 @@
 #include <QtGlobal>
 
 Reader::Reader() :
-    _jobs(),
+    _job_sets(),
     _factories()
 {
 
@@ -32,10 +32,13 @@ bool Reader::_string2int( const std::string& str, int& result )
 
 bool Reader::read(char* path)
 {
+    _clear();
+
     std::ifstream ifs(path, std::ifstream::in);
     if(!ifs.good())
     {
         printf("failed to open %s\n", path);
+        _clear();
         return false;
     }
 
@@ -69,10 +72,10 @@ bool Reader::read(char* path)
                 continue;
             }
             read_job = true;
-            _jobs.push_back(std::vector<Job>(num_jobs));
-            for(size_t i = 0; i < _jobs.back().size(); ++i)
+            _job_sets.push_back(std::vector<Job>(num_jobs));
+            for(size_t i = 0; i < _job_sets.back().size(); ++i)
             {
-                _jobs.back().at(i).id = i;
+                _job_sets.back().at(i).id = i;
             }
             _factories.push_back(Factory(num_machines));
             continue;
@@ -87,6 +90,7 @@ bool Reader::read(char* path)
         if((int)tokens.size() != num_jobs)
         {
             printf("error: token size %zu and num of jobs %d mismatch\n", tokens.size(), num_jobs);
+            _clear();
             return false;
         }
 
@@ -96,9 +100,10 @@ bool Reader::read(char* path)
             if(!_string2int( tokens[i], processing_time))
             {
                 printf("error: tokens[%zu] (%s) is not integer\n", i, tokens[i].c_str());
+                _clear();
                 return false;
             }
-            _jobs.back().at(i).processing_times.push_back(processing_time);
+            _job_sets.back().at(i).processing_times.push_back(processing_time);
         }
 
         ++count;
@@ -112,5 +117,12 @@ bool Reader::read(char* path)
     }
 
     ifs.close();
+
+    if(_job_sets.size() != _factories.size())
+    {
+        printf("error: job set size %zu and factory size %zu mismatch\n", _job_sets.size(), _factories.size());
+        _clear();
+        return false;
+    }
     return true;
 }

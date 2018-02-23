@@ -1,7 +1,7 @@
 #ifndef IO_H
 #define IO_H
 
-#define io_debug(format, ...) if (io::is_debug()) { _debug(format, ##__VA_ARGS__); }
+#define io_debug( format, ... ) if ( io::is_debug() ) { io::_debug(format, ##__VA_ARGS__); }
 
 namespace io {
 
