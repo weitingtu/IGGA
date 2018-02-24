@@ -8,6 +8,7 @@
 #include "cfi.h"
 #include "cdjs.h"
 #include "ris.h"
+#include "consdes.h"
 #include "ioApi.h"
 #include "writer.h"
 #include <QAction>
@@ -43,6 +44,7 @@ MainWindow::MainWindow(QWidget *parent)
       _run_menu(nullptr),
       _open_act(nullptr),
       _cfi_act(nullptr),
+      _consdef_act(nullptr),
       _verbose_act(nullptr),
       _r()
 {
@@ -61,6 +63,8 @@ void MainWindow::_create_actions()
     connect(_open_act, SIGNAL(triggered(bool)), this, SLOT(_open()));
     _cfi_act = new QAction(tr("CFI"), this);
     connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _consdef_act= new QAction(tr("Construct Destruct"), this);
+    connect(_consdef_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _verbose_act = new QAction(tr("Verbose"), this);
     _verbose_act->setCheckable(true);
     connect(_verbose_act, SIGNAL(triggered(bool)), this, SLOT(_verbose(bool)));
@@ -74,6 +78,7 @@ void MainWindow::_create_menus()
     _file_menu->addAction(_verbose_act);
     _run_menu = menuBar()->addMenu(tr("&Run"));
     _run_menu->addAction(_cfi_act);
+    _run_menu->addAction(_consdef_act);
 }
 
 void MainWindow::_open()
@@ -108,6 +113,20 @@ void MainWindow::_run() const
             t.start();
 
             CFI cfi(_r.get_jobs(i), _r.get_factory(i));
+            cfi.run();
+
+            job_sets.push_back(cfi.get_result());
+            times.push_back(t.elapsed());
+        }
+    }
+    else if(s == _consdef_act)
+    {
+        for(size_t i = 0; i < _r.size();++i)
+        {
+            QTime t;
+            t.start();
+
+            ConsDes cfi(2, _r.get_jobs(i), _r.get_factory(i));
             cfi.run();
 
             job_sets.push_back(cfi.get_result());

@@ -36,6 +36,7 @@ private:
     QMenu*   _run_menu;
     QAction* _open_act;
     QAction* _cfi_act;
+    QAction* _consdef_act;
     QAction* _verbose_act;
     Reader _r;
 

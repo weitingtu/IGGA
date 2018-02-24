@@ -11,7 +11,7 @@ public:
     CFI(const Jobs& jobs, const Factory& factory);
 
     void run();
-    const Jobs& get_result() const { return _jobs; }
+    const Jobs& get_result() const { return _factory.get_jobs(); }
 
 private:
     Job _create_job(const Job& job, unsigned job_factor) const;
