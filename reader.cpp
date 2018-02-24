@@ -6,6 +6,7 @@
 #include <QtGlobal>
 
 Reader::Reader() :
+    _file_name(),
     _job_sets(),
     _factories()
 {
@@ -33,6 +34,8 @@ bool Reader::_string2int( const std::string& str, int& result )
 bool Reader::read(char* path)
 {
     _clear();
+
+    _file_name = path;
 
     std::ifstream ifs(path, std::ifstream::in);
     if(!ifs.good())

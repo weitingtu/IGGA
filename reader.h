@@ -14,13 +14,15 @@ public:
     bool empty() const { return _job_sets.empty(); }
     size_t size() const { return _job_sets.size(); }
 
+    const std::string& get_file_name() const { return _file_name; }
     const Jobs&    get_jobs(size_t i) const  { return _job_sets.at(i); }
     const Factory& get_factory(size_t i) const { return _factories.at(i); }
 
 private:
     bool _string2int( const std::string& str, int& result );
-    void _clear() { _job_sets.clear(); _factories.clear(); }
+    void _clear() { _file_name.clear(); _job_sets.clear(); _factories.clear(); }
 
+    std::string          _file_name;
     std::vector<Jobs>    _job_sets;
     std::vector<Factory> _factories;
 };

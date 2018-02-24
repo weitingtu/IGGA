@@ -1,10 +1,34 @@
 #include "writer.h"
+#include <string>
+#include <sstream>
+#include <vector>
+#include <iterator>
+
+template<typename Out>
+void split(const std::string &s, char delim, Out result) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        *(result++) = item;
+    }
+}
+
+std::vector<std::string> split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    split(s, delim, std::back_inserter(elems));
+    return elems;
+}
 
 Writer::Writer()
 {
 }
 
-void Writer::_write(FILE* fp, const Jobs& jobs) const
+void Writer::_write(FILE* fp,
+                    const std::string& file_name,
+                    int time,
+                    unsigned iteration,
+                    const Jobs& jobs
+                    ) const
 {
     if(jobs.empty())
     {
@@ -31,8 +55,11 @@ void Writer::_write(FILE* fp, const Jobs& jobs) const
         sum_f += jobs.at(i).machine_times.back();
     }
 
-    fprintf(fp, "Cmax,  %u\n", c_max);
-    fprintf(fp, "Sum F, %u\n", sum_f);
+    fprintf(fp, "Filename, %s\n",  file_name.c_str());
+    fprintf(fp, "Cmax, %u\n",       c_max);
+    fprintf(fp, "Sum F, %u\n",      sum_f);
+    fprintf(fp, "Time used, %d\n",  time);
+    fprintf(fp, "Iterations, %u\n", iteration);
     fprintf(fp, "Seq, Job-No, Complete Time (F)\n");
     for(size_t i = 0; i < jobs.size(); ++i)
     {
@@ -42,25 +69,37 @@ void Writer::_write(FILE* fp, const Jobs& jobs) const
     fprintf(fp, "\n");
 }
 
-void Writer::write(const std::string& file_name, const std::vector<Jobs> &job_sets) const
+void Writer::write(const std::string& in_name,
+                   const std::vector<int>& times,
+                   const std::vector<unsigned>& iterations,
+                   const std::vector<Jobs>& job_sets
+                   ) const
 {
+    if(in_name.empty())
+    {
+        printf("error: empty file name\n");
+        return;
+    }
     if(job_sets.empty())
     {
         printf("error: empty job sets\n");
         return;
     }
 
-    FILE* fp = fopen(file_name.c_str(), "w");
+    std::vector<std::string> tokens = split( in_name, '.' );
+    std::string out_name = tokens.front() + ".csv";
+
+    FILE* fp = fopen(out_name.c_str(), "w");
 
     if(nullptr == fp)
     {
-        printf("error: failed to open %s\n", file_name.c_str());
+        printf("error: failed to open %s\n", in_name.c_str());
         return;
     }
 
     for(size_t i = 0; i < job_sets.size(); ++i)
     {
-        _write(fp, job_sets.at(i));
+        _write(fp, in_name, times.at(i), iterations.at(i), job_sets.at(i));
     }
 
     fclose(fp);

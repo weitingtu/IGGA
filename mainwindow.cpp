@@ -13,6 +13,8 @@
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
+#include <QTime>
+#include <QFileInfo>
 
 static Jobs _creat_test_jobs()
 {
@@ -94,19 +96,29 @@ void MainWindow::_run() const
         printf("warn: jobs and factory are empty. Please read case first\n");
         return;
     }
-    std::vector<Jobs> job_sets;
+    QFileInfo file_info(QString(_r.get_file_name().c_str()));
+    std::vector<Jobs>     job_sets;
+    std::vector<int>      times;
+    std::vector<unsigned> iterations;
     if(s == _cfi_act)
     {
         for(size_t i = 0; i < _r.size();++i)
         {
+            QTime t;
+            t.start();
+
             CFI cfi(_r.get_jobs(i), _r.get_factory(i));
             cfi.run();
+
             job_sets.push_back(cfi.get_result());
+            times.push_back(t.elapsed());
         }
     }
 
+    iterations.resize(job_sets.size(), 0);
+
     Writer w;
-    w.write("out.csv", job_sets);
+    w.write( file_info.fileName().toLatin1().data(), times, iterations, job_sets );
 }
 
 void MainWindow::_test_cost_function() const
