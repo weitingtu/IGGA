@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     cdjs.cpp \
     ris.cpp \
     writer.cpp \
-    consdes.cpp
+    consdes.cpp \
+    scheduler.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -53,4 +54,5 @@ HEADERS  += mainwindow.h \
     cdjs.h \
     ris.h \
     writer.h \
-    consdes.h
+    consdes.h \
+    scheduler.h

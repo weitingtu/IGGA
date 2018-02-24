@@ -4,9 +4,8 @@
 #include <QtGlobal>
 #include "ioApi.h"
 
-CFI::CFI(const Jobs &jobs, const Factory &factory):
-    _jobs(jobs),
-    _factory(factory)
+CFI::CFI(const Jobs &jobs, const Factory &factory)
+    : Scheduler(jobs, factory)
 {
 }
 

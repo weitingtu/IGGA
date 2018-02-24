@@ -1,17 +1,18 @@
 #ifndef CFI_H
 #define CFI_H
 
+#include "scheduler.h"
 #include "job.h"
 #include "factory.h"
 #include <set>
 
-class CFI
+class CFI : public Scheduler
 {
 public:
     CFI(const Jobs& jobs, const Factory& factory);
 
-    void run();
-    const Jobs& get_result() const { return _factory.get_jobs(); }
+    virtual void run();
+//    const Jobs& get_result() const { return _factory.get_jobs(); }
 
 private:
     Job _create_job(const Job& job, unsigned job_factor) const;
@@ -21,9 +22,6 @@ private:
     unsigned _get_index_function_value(const Jobs& pi, unsigned job_id);
     Jobs _isa();
     Jobs _neh(Jobs pi);
-
-    Jobs    _jobs;
-    Factory _factory;
 };
 
 #endif // CFI_H

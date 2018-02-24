@@ -1,8 +1,7 @@
 #include "cdjs.h"
 
-CDJS::CDJS(const Jobs &jobs, const Factory &factory) :
-    _jobs(jobs),
-    _factory(factory)
+CDJS::CDJS(const Jobs &jobs, const Factory &factory)
+    : Scheduler(jobs, factory)
 {
 }
 

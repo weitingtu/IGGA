@@ -21,8 +21,8 @@ std::vector<int> KnuthShuffle( int n, int low, int up)
     return std::vector<int>(poker.begin(), poker.begin() + n);
 }
 
-ConsDes::ConsDes(unsigned d, const Jobs &jobs, const Factory &Factory)
-    : _d(d), _jobs(jobs), _factory(Factory)
+ConsDes::ConsDes(unsigned d, const Jobs& jobs, const Factory& factory)
+    : Scheduler(jobs, factory), _d(d)
 {
 }
 
