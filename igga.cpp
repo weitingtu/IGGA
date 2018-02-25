@@ -273,7 +273,5 @@ bool IGGA::_is_accept(unsigned pi_purown, unsigned pi_new) const
     double ap    = exp( -( ( pi_purown - pi_new ) / pi_new ) * 100 );
     double alpha = (double) rand() / (RAND_MAX + 1.0 );
 
-    printf("ap %f alpha %f\n", ap, alpha);
-
     return ap < alpha;
 }
