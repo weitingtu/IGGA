@@ -2,10 +2,9 @@
 #include "ioApi.h"
 #include <QtGlobal>
 
-RIS::RIS(const Jobs &jobs, const Jobs &pi_best, const Factory &Factory):
-    _jobs(jobs),
-    _pi_best(pi_best),
-    _factory(Factory)
+RIS::RIS(const Jobs &jobs, const Jobs &pi_best, const Factory &factory)
+    : Scheduler(jobs, factory),
+    _pi_best(pi_best)
 {
 }
 

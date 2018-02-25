@@ -1,22 +1,18 @@
 #ifndef FNM_H
 #define FNM_H
 
-#include "job.h"
-#include "factory.h"
+#include "scheduler.h"
 
-class FNM
+class FNM : public Scheduler
 {
 public:
     FNM(const Jobs& jobs, const Factory& factory);
 
-    void run();
+    virtual void run();
 
 private:
     Jobs _init();
     Jobs _neh(Jobs pi);
-
-    Jobs    _jobs;
-    Factory _factory;
 };
 
 #endif // FNM_H

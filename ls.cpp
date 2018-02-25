@@ -58,8 +58,8 @@ class Machine
 
 using Machines = std::vector<Machine>;
 
-LS::LS(const Jobs &jobs, const Factory &Factory)
-    : _jobs(jobs), _factory(Factory)
+LS::LS(const Jobs &jobs, const Factory& factory)
+    : Scheduler(jobs, factory)
 {
 
 }
@@ -128,7 +128,7 @@ void LS::run()
             pi.push_back(_jobs.at(machine_jobs.at(i).id));
         }
         _factory.add_jobs(pi);
-        _factory.print();
+//        _factory.print();
         unsigned cost = _factory.get_cost();
         if(cost < min_cost)
         {

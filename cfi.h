@@ -2,8 +2,6 @@
 #define CFI_H
 
 #include "scheduler.h"
-#include "job.h"
-#include "factory.h"
 #include <set>
 
 class CFI : public Scheduler
@@ -12,7 +10,6 @@ public:
     CFI(const Jobs& jobs, const Factory& factory);
 
     virtual void run();
-//    const Jobs& get_result() const { return _factory.get_jobs(); }
 
 private:
     Job _create_job(const Job& job, unsigned job_factor) const;

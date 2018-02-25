@@ -22,14 +22,16 @@ struct JobSeq
 };
 
 FNM::FNM(const Jobs &jobs, const Factory &factory)
-    : _jobs(jobs), _factory(factory)
+    : Scheduler(jobs, factory)
 {
 }
 
 void FNM::run()
 {
     Jobs pi = _init();
-    _neh(pi);
+    pi = _neh(pi);
+    _factory.add_jobs(pi);
+    _factory.print();
 }
 
 Jobs FNM::_init()
@@ -68,8 +70,8 @@ Jobs FNM::_init()
     {
         pi.push_back(_jobs.at(job_seqs.at(i).id));
     }
-    _factory.add_jobs(pi);
-    _factory.print();
+//    _factory.add_jobs(pi);
+//    _factory.print();
 
     return pi;
 }

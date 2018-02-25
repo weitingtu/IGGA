@@ -1,19 +1,14 @@
 #ifndef LS_H
 #define LS_H
 
-#include "job.h"
-#include "factory.h"
+#include "scheduler.h"
 
-class LS
+class LS : public Scheduler
 {
 public:
-    LS(const Jobs& jobs, const Factory& Factory);
+    LS(const Jobs& jobs, const Factory& factory);
 
-    void run();
-
-private:
-    Jobs    _jobs;
-    Factory _factory;
+    virtual void run();
 };
 
 #endif // LS_H

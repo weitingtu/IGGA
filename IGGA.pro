@@ -38,7 +38,9 @@ SOURCES += main.cpp\
     ris.cpp \
     writer.cpp \
     consdes.cpp \
-    scheduler.cpp
+    scheduler.cpp \
+    igga.cpp \
+    possibility.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -55,4 +57,6 @@ HEADERS  += mainwindow.h \
     ris.h \
     writer.h \
     consdes.h \
-    scheduler.h
+    scheduler.h \
+    igga.h \
+    possibility.h

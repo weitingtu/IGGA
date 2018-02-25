@@ -1,20 +1,15 @@
 #ifndef NEH_H
 #define NEH_H
 
-#include "job.h"
-#include "factory.h"
-#include <vector>
+#include "scheduler.h"
 
-class NEH
+class NEH : public Scheduler
 {
 public:
     NEH(const Jobs& jobs, const Factory& factory);
 
-    void run();
+    virtual void run();
     Jobs run(const Jobs& pi1);
-private:
-    Jobs    _jobs;
-    Factory _factory;
 };
 
 #endif // NEH_H

@@ -1,19 +1,16 @@
 #ifndef RIS_H
 #define RIS_H
 
-#include "job.h"
-#include "factory.h"
+#include "scheduler.h"
 
-class RIS
+class RIS : public Scheduler
 {
 public:
-    RIS(const Jobs& jobs, const Jobs& pi_best, const Factory& Factory);
+    RIS(const Jobs& jobs, const Jobs& pi_best, const Factory& factory);
 
-    void run();
+    virtual void run();
 private:
-    Jobs    _jobs;
     Jobs    _pi_best;
-    Factory _factory;
 };
 
 #endif // RIS_H

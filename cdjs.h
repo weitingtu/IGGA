@@ -2,8 +2,6 @@
 #define CDJS_H
 
 #include "scheduler.h"
-#include "job.h"
-#include "factory.h"
 
 class CDJS : public Scheduler
 {

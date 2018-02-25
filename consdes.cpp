@@ -1,25 +1,6 @@
 #include "consdes.h"
-#include <stdlib.h>
+#include "possibility.h"
 #include <set>
-
-std::vector<int> KnuthShuffle( int n, int low, int up)
-{
-    int size = up - low + 1;
-
-    std::vector<int> poker(size);
-    for(int i = 0 ; i < size; ++i)
-    {
-        poker[i] = i + low;
-    }
-
-    for(int i = size - 1; i > 0; --i)
-    {
-        int pos = ( int ) ( rand() / ( RAND_MAX + 1.0 ) * ( i + 1));
-        std::swap(poker[pos], poker[i]);
-    }
-
-    return std::vector<int>(poker.begin(), poker.begin() + n);
-}
 
 ConsDes::ConsDes(unsigned d, const Jobs& jobs, const Factory& factory)
     : Scheduler(jobs, factory), _d(d)
@@ -34,7 +15,7 @@ void ConsDes::run()
         return;
     }
 
-    std::vector<int> id_vec = KnuthShuffle( _d, 0, _jobs.size() - 1);
+    std::vector<int> id_vec = Possibility::KnuthShuffle( _d, 0, _jobs.size() - 1);
     std::set<unsigned> selected_ids(id_vec.begin(), id_vec.end());
 
     Jobs pi1;

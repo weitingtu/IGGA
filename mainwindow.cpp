@@ -9,9 +9,11 @@
 #include "cdjs.h"
 #include "ris.h"
 #include "consdes.h"
+#include "igga.h"
 #include "ioApi.h"
 #include "writer.h"
 #include "scheduler.h"
+#include "possibility.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QFileDialog>
@@ -44,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent)
       _file_menu(nullptr),
       _run_menu(nullptr),
       _open_act(nullptr),
+      _igga_act(nullptr),
       _cfi_act(nullptr),
       _consdef_act(nullptr),
       _verbose_act(nullptr),
@@ -62,6 +65,8 @@ void MainWindow::_create_actions()
 {
     _open_act = new QAction(tr("&Open"), this);
     connect(_open_act, SIGNAL(triggered(bool)), this, SLOT(_open()));
+    _igga_act = new QAction(tr("IGGA"), this);
+    connect(_igga_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _cfi_act = new QAction(tr("CFI"), this);
     connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _consdef_act= new QAction(tr("Construct Destruct"), this);
@@ -78,6 +83,7 @@ void MainWindow::_create_menus()
     _file_menu->addSeparator();
     _file_menu->addAction(_verbose_act);
     _run_menu = menuBar()->addMenu(tr("&Run"));
+    _run_menu->addAction(_igga_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
 }
@@ -103,6 +109,8 @@ void MainWindow::_run() const
         return;
     }
 
+    Possibility::init();
+
     std::vector<Jobs>     job_sets;
     std::vector<int>      times;
     std::vector<unsigned> iterations;
@@ -114,7 +122,11 @@ void MainWindow::_run() const
 
         Scheduler* scheduler = nullptr;
 
-        if(s == _cfi_act)
+        if(s == _igga_act)
+        {
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _cfi_act)
         {
             scheduler = new CFI(_r.get_jobs(i), _r.get_factory(i));
         }

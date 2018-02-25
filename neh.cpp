@@ -2,9 +2,8 @@
 #include "utils.h"
 #include <algorithm>
 
-NEH::NEH(const Jobs &jobs, const Factory &factory):
-    _jobs(jobs),
-    _factory(factory)
+NEH::NEH(const Jobs &jobs, const Factory &factory)
+    : Scheduler(jobs, factory)
 {
 }
 
@@ -46,7 +45,8 @@ Jobs NEH::run(const Jobs& pi1)
         pi2 = best;
     }
     _factory.add_jobs(pi2);
-    _factory.print();
+//    _factory.print();
 
-    return pi2;
+//    return pi2;
+    return _factory.get_jobs();
 }
