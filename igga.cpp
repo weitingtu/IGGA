@@ -120,10 +120,10 @@ void Init::select(Jobs& pi_incumbent, std::vector<Jobs>& others)
     }
 }
 
-IGGA::IGGA(const Jobs &jobs, const Factory &factory)
+IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp)
     : Scheduler(jobs, factory),
-      _d(2),
-      _jp(0.1)
+      _d(d),
+      _jp(jp)
 {
 }
 

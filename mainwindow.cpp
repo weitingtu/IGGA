@@ -19,6 +19,10 @@
 #include <QFileDialog>
 #include <QTime>
 #include <QFileInfo>
+#include <QLabel>
+#include <QGridLayout>
+#include <QSpinBox>
+#include <QDoubleSpinBox>
 
 static Jobs _creat_test_jobs()
 {
@@ -50,15 +54,28 @@ MainWindow::MainWindow(QWidget *parent)
       _cfi_act(nullptr),
       _consdef_act(nullptr),
       _verbose_act(nullptr),
+      _d_spinbox(nullptr),
+      _jp_spinbox(nullptr),
       _r()
 {
     _create_actions();
     _create_menus();
+    _create_layout();
 }
 
 MainWindow::~MainWindow()
 {
 
+}
+
+QSize MainWindow::minimumSizeHint() const
+{
+    return QSize(640, 480);
+}
+
+QSize MainWindow::sizeHint() const
+{
+    return QSize(1024, 768);
 }
 
 void MainWindow::_create_actions()
@@ -86,6 +103,30 @@ void MainWindow::_create_menus()
     _run_menu->addAction(_igga_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
+}
+
+void MainWindow::_create_layout()
+{
+    QWidget* w = new QWidget(this);
+    setCentralWidget(w);
+
+    _d_spinbox = new QSpinBox();
+    _d_spinbox->setPrefix("d: ");
+    _d_spinbox->setMinimum(0);
+    _d_spinbox->setMaximum(10);
+    _d_spinbox->setValue(2);
+
+    _jp_spinbox = new QDoubleSpinBox();
+    _jp_spinbox->setPrefix("jp: ");
+    _jp_spinbox->setMinimum(0.0);
+    _jp_spinbox->setMaximum(1.0);
+    _jp_spinbox->setValue(0.9);
+
+    QGridLayout* layout = new QGridLayout(w);
+    layout->addWidget(_d_spinbox, 0, 0);
+    layout->addWidget(_jp_spinbox, 1, 0);
+    layout->setRowStretch(2, 100);
+    layout->setColumnStretch(1, 100);
 }
 
 void MainWindow::_open()
@@ -124,15 +165,15 @@ void MainWindow::_run() const
 
         if(s == _igga_act)
         {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),_d_spinbox->value(), _jp_spinbox->value());
         }
         else if(s == _cfi_act)
         {
             scheduler = new CFI(_r.get_jobs(i), _r.get_factory(i));
         }
-        else if(s == _cfi_act)
+        else if(s == _consdef_act)
         {
-            scheduler = new ConsDes(2, _r.get_jobs(i), _r.get_factory(i));
+            scheduler = new ConsDes(_d_spinbox->value(), _r.get_jobs(i), _r.get_factory(i));
         }
 
         if(nullptr == scheduler)

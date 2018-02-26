@@ -6,6 +6,8 @@
 
 class QAction;
 class QMenu;
+class QSpinBox;
+class QDoubleSpinBox;
 
 class MainWindow : public QMainWindow
 {
@@ -15,6 +17,9 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    virtual QSize minimumSizeHint() const override;
+    virtual QSize sizeHint() const override;
+
 private slots:
     void _open();
     void _run() const;
@@ -23,6 +28,7 @@ private slots:
 private:
     void _create_actions();
     void _create_menus();
+    void _create_layout();
     void _test_cost_function() const;
     void _test_neh() const;
     void _test_ph1() const;
@@ -39,6 +45,8 @@ private:
     QAction* _cfi_act;
     QAction* _consdef_act;
     QAction* _verbose_act;
+    QSpinBox* _d_spinbox;
+    QDoubleSpinBox* _jp_spinbox;
     Reader _r;
 
 };

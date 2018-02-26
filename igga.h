@@ -6,7 +6,7 @@
 class IGGA : public Scheduler
 {
 public:
-    IGGA(const Jobs& jobs, const Factory& factory);
+    IGGA(const Jobs& jobs, const Factory& factory, unsigned d, double jp);
 
     virtual void run();
 
