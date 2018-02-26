@@ -42,6 +42,7 @@ private:
     QMenu*   _run_menu;
     QAction* _open_act;
     QAction* _igga_act;
+    QAction* _ig_act;
     QAction* _cfi_act;
     QAction* _consdef_act;
     QAction* _ls_act;
@@ -53,6 +54,9 @@ private:
     QAction* _verbose_act;
     QSpinBox* _d_spinbox;
     QDoubleSpinBox* _jp_spinbox;
+    QSpinBox* _t0_spinbox;
+    QDoubleSpinBox* _alpha_spinbox;
+    QSpinBox* _gamma_spinbox;
     Reader _r;
 
 };

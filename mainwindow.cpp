@@ -10,6 +10,7 @@
 #include "ris.h"
 #include "consdes.h"
 #include "igga.h"
+#include "ig.h"
 #include "ioApi.h"
 #include "writer.h"
 #include "scheduler.h"
@@ -51,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
       _run_menu(nullptr),
       _open_act(nullptr),
       _igga_act(nullptr),
+      _ig_act(nullptr),
       _cfi_act(nullptr),
       _consdef_act(nullptr),
       _ls_act(nullptr),
@@ -62,6 +64,9 @@ MainWindow::MainWindow(QWidget *parent)
       _verbose_act(nullptr),
       _d_spinbox(nullptr),
       _jp_spinbox(nullptr),
+      _t0_spinbox(nullptr),
+      _alpha_spinbox(nullptr),
+      _gamma_spinbox(nullptr),
       _r()
 {
     _create_actions();
@@ -90,6 +95,8 @@ void MainWindow::_create_actions()
     connect(_open_act, SIGNAL(triggered(bool)), this, SLOT(_open()));
     _igga_act = new QAction(tr("IGGA"), this);
     connect(_igga_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ig_act = new QAction(tr("IG"), this);
+    connect(_ig_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _cfi_act = new QAction(tr("CFI"), this);
     connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _consdef_act= new QAction(tr("Construct Destruct"), this);
@@ -119,6 +126,7 @@ void MainWindow::_create_menus()
     _file_menu->addAction(_verbose_act);
     _run_menu = menuBar()->addMenu(tr("&Run"));
     _run_menu->addAction(_igga_act);
+    _run_menu->addAction(_ig_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
     _run_menu->addAction(_ls_act);
@@ -144,12 +152,33 @@ void MainWindow::_create_layout()
     _jp_spinbox->setPrefix("jp: ");
     _jp_spinbox->setMinimum(0.0);
     _jp_spinbox->setMaximum(1.0);
-    _jp_spinbox->setValue(0.9);
+    _jp_spinbox->setValue(0.1);
+
+    _t0_spinbox = new QSpinBox();
+    _t0_spinbox->setPrefix("t0: ");
+    _t0_spinbox->setMinimum(0);
+    _t0_spinbox->setMaximum(100);
+    _t0_spinbox->setValue(1000);
+
+    _alpha_spinbox = new QDoubleSpinBox();
+    _alpha_spinbox->setPrefix("alpha: ");
+    _alpha_spinbox->setMinimum(0.0);
+    _alpha_spinbox->setMaximum(1.0);
+    _alpha_spinbox->setValue(0.9);
+
+    _gamma_spinbox = new QSpinBox();
+    _gamma_spinbox->setPrefix("gamma: ");
+    _gamma_spinbox->setMinimum(0);
+    _gamma_spinbox->setMaximum(100);
+    _gamma_spinbox->setValue(20);
 
     QGridLayout* layout = new QGridLayout(w);
     layout->addWidget(_d_spinbox, 0, 0);
     layout->addWidget(_jp_spinbox, 1, 0);
-    layout->setRowStretch(2, 100);
+    layout->addWidget(_t0_spinbox, 2, 0);
+    layout->addWidget(_alpha_spinbox, 3, 0);
+    layout->addWidget(_gamma_spinbox, 4, 0);
+    layout->setRowStretch(5, 100);
     layout->setColumnStretch(1, 100);
 }
 
@@ -190,6 +219,12 @@ void MainWindow::_run() const
         if(s == _igga_act)
         {
             scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), _d_spinbox->value(), _jp_spinbox->value());
+        }
+        else if(s == _ig_act)
+        {
+            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i),
+                               _d_spinbox->value(),
+                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
         }
         else if(s == _cfi_act)
         {

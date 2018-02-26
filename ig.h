@@ -6,7 +6,7 @@
 class IG : public Scheduler
 {
 public:
-    IG(unsigned d, const Jobs& jobs, const Factory& factory);
+    IG(const Jobs& jobs, const Factory& factory, unsigned d, unsigned t0, double alpha, unsigned gamma);
 
     virtual void run();
 private:

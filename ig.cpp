@@ -4,12 +4,12 @@
 #include "possibility.h"
 #include <stdlib.h>
 
-IG::IG(unsigned d, const Jobs &jobs, const Factory &factory)
+IG::IG(const Jobs& jobs, const Factory& factory, unsigned d, unsigned t0, double alpha, unsigned gamma)
     : Scheduler(jobs, factory),
       _d(d),
-      _t0(100),
-      _alpha(0.9),
-      _gamma(20)
+      _t0(t0),
+      _alpha(alpha),
+      _gamma(gamma)
 {
 
 }
@@ -60,7 +60,7 @@ void IG::run()
 
 bool IG::_is_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const
 {
-    double ap    = exp( -( ( pi_purown - pi_new ) / t ) );
+    double ap    = exp( -( (double)( pi_purown - pi_new ) / t ) );
     double alpha = (double) rand() / (RAND_MAX + 1.0 );
 
     return alpha < ap;
