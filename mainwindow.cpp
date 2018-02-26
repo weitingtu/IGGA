@@ -56,6 +56,9 @@ MainWindow::MainWindow(QWidget *parent)
       _ls_act(nullptr),
       _ph1_act(nullptr),
       _neh_act(nullptr),
+      _cdjs_act(nullptr),
+      _fnm_act(nullptr),
+      _ris_act(nullptr),
       _verbose_act(nullptr),
       _d_spinbox(nullptr),
       _jp_spinbox(nullptr),
@@ -97,6 +100,12 @@ void MainWindow::_create_actions()
     connect(_ph1_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _neh_act= new QAction(tr("NEH"), this);
     connect(_neh_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _cdjs_act= new QAction(tr("CDJS"), this);
+    connect(_cdjs_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _fnm_act= new QAction(tr("FNM"), this);
+    connect(_fnm_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ris_act= new QAction(tr("RIS"), this);
+    connect(_ris_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _verbose_act = new QAction(tr("Verbose"), this);
     _verbose_act->setCheckable(true);
     connect(_verbose_act, SIGNAL(triggered(bool)), this, SLOT(_verbose(bool)));
@@ -115,6 +124,9 @@ void MainWindow::_create_menus()
     _run_menu->addAction(_ls_act);
     _run_menu->addAction(_ph1_act);
     _run_menu->addAction(_neh_act);
+    _run_menu->addAction(_cdjs_act);
+    _run_menu->addAction(_fnm_act);
+    _run_menu->addAction(_ris_act);
 }
 
 void MainWindow::_create_layout()
@@ -198,6 +210,18 @@ void MainWindow::_run() const
         else if(s == _neh_act)
         {
             scheduler = new NEH(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _cdjs_act)
+        {
+            scheduler = new CDJS(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _fnm_act)
+        {
+            scheduler = new FNM(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _ris_act)
+        {
+            scheduler = new RIS(_r.get_jobs(i), _r.get_jobs(i), _r.get_factory(i));
         }
 
         if(nullptr == scheduler)
