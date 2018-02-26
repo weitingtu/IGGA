@@ -36,6 +36,7 @@ Jobs PH1::_isa()
             unsigned cost = _factory.get_cost();
             if(cost < min_cost)
             {
+                min_ite = ite;
                 min_cost = cost;
                 best = tmp;
             }
@@ -100,8 +101,8 @@ Jobs PH1::_pair_wise_exchange(Jobs pi)
 void PH1::run()
 {
     Jobs pi = _isa();
-    pi = _neh(pi);
-    pi = _pair_wise_exchange(pi);
+//    pi = _neh(pi);
+//    pi = _pair_wise_exchange(pi);
     _factory.add_jobs(pi);
     _factory.print();
 }

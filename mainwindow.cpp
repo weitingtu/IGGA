@@ -53,6 +53,9 @@ MainWindow::MainWindow(QWidget *parent)
       _igga_act(nullptr),
       _cfi_act(nullptr),
       _consdef_act(nullptr),
+      _ls_act(nullptr),
+      _ph1_act(nullptr),
+      _neh_act(nullptr),
       _verbose_act(nullptr),
       _d_spinbox(nullptr),
       _jp_spinbox(nullptr),
@@ -88,6 +91,12 @@ void MainWindow::_create_actions()
     connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _consdef_act= new QAction(tr("Construct Destruct"), this);
     connect(_consdef_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ls_act= new QAction(tr("LS"), this);
+    connect(_ls_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ph1_act= new QAction(tr("PH1"), this);
+    connect(_ph1_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _neh_act= new QAction(tr("NEH"), this);
+    connect(_neh_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _verbose_act = new QAction(tr("Verbose"), this);
     _verbose_act->setCheckable(true);
     connect(_verbose_act, SIGNAL(triggered(bool)), this, SLOT(_verbose(bool)));
@@ -103,6 +112,9 @@ void MainWindow::_create_menus()
     _run_menu->addAction(_igga_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
+    _run_menu->addAction(_ls_act);
+    _run_menu->addAction(_ph1_act);
+    _run_menu->addAction(_neh_act);
 }
 
 void MainWindow::_create_layout()
@@ -165,7 +177,7 @@ void MainWindow::_run() const
 
         if(s == _igga_act)
         {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),_d_spinbox->value(), _jp_spinbox->value());
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), _d_spinbox->value(), _jp_spinbox->value());
         }
         else if(s == _cfi_act)
         {
@@ -174,6 +186,18 @@ void MainWindow::_run() const
         else if(s == _consdef_act)
         {
             scheduler = new ConsDes(_d_spinbox->value(), _r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _ls_act)
+        {
+            scheduler = new LS(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _ph1_act)
+        {
+            scheduler = new PH1(_r.get_jobs(i), _r.get_factory(i));
+        }
+        else if(s == _neh_act)
+        {
+            scheduler = new NEH(_r.get_jobs(i), _r.get_factory(i));
         }
 
         if(nullptr == scheduler)

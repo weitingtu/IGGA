@@ -96,7 +96,7 @@ void LS::run()
     unsigned min_cost = std::numeric_limits<unsigned>::max();
     Machine best_machine(_jobs.size());
     std::set<unsigned> idx_set;
-    while(idx_set.size() < _jobs.size())
+    while(idx_set.size() < machines.size())
     {
         unsigned max_idx = std::numeric_limits<unsigned>::max();
         unsigned max_sum = 0;
@@ -117,6 +117,7 @@ void LS::run()
                 max_machine = machine;
             }
         }
+        Q_ASSERT(max_idx != std::numeric_limits<unsigned>::max());
         idx_set.insert(max_idx);
         best_machine = max_machine;
 

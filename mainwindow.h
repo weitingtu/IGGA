@@ -44,6 +44,9 @@ private:
     QAction* _igga_act;
     QAction* _cfi_act;
     QAction* _consdef_act;
+    QAction* _ls_act;
+    QAction* _ph1_act;
+    QAction* _neh_act;
     QAction* _verbose_act;
     QSpinBox* _d_spinbox;
     QDoubleSpinBox* _jp_spinbox;

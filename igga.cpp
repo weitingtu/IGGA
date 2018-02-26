@@ -132,7 +132,19 @@ Jobs IGGA::_crossvoer(const Jobs& pi_new, const Jobs& jobs)
     std::vector<int> indice = Possibility::KnuthShuffle(2, 0, jobs.size() - 1);
     unsigned idx1 = std::min(indice.front(), indice.back());
     unsigned idx2 = std::max(indice.front(), indice.back());
-    printf("idx (%zu, %zu)\n", idx1, idx2);
+    printf("idx1 %u idx2 %u\n", idx1, idx2);
+    for(size_t i = 0; i < pi_new.size(); ++i)
+    {
+        const Job& job = pi_new.at(i);
+        printf("%zu %u ", i, job.id);
+    }
+    printf("\n");
+    for(size_t i = 0; i < jobs.size(); ++i)
+    {
+        const Job& job = jobs.at(i);
+        printf("%zu %u ", i, job.id);
+    }
+    printf("\n");
 
     Jobs sub_pi_new(pi_new.begin() + idx1, pi_new.begin() + idx2 + 1);
     std::set<unsigned> sub_pi_new_set;
@@ -140,6 +152,12 @@ Jobs IGGA::_crossvoer(const Jobs& pi_new, const Jobs& jobs)
     {
         sub_pi_new_set.insert(sub_pi_new.at(i).id);
     }
+    for(size_t i = 0; i < sub_pi_new.size(); ++i)
+    {
+        const Job& job = sub_pi_new.at(i);
+        printf("%zu %u ", i, job.id);
+    }
+    printf("\n");
 
     Jobs sub_jobs;
     for(size_t i = 0; i < jobs.size(); ++i)
@@ -150,7 +168,14 @@ Jobs IGGA::_crossvoer(const Jobs& pi_new, const Jobs& jobs)
             sub_jobs.push_back(job);
         }
     }
+    for(size_t i = 0; i < sub_jobs.size(); ++i)
+    {
+        const Job& job = sub_jobs.at(i);
+        printf("%zu %u ", i, job.id);
+    }
+    printf("\n");
 
+    printf("sub jobs size %zu sub pi new size %zu\n", sub_jobs.size(), sub_pi_new.size());
     Q_ASSERT(sub_jobs.size() + sub_pi_new.size() == jobs.size());
 
     Jobs pi(sub_jobs.begin(), sub_jobs.begin() + idx1);
@@ -204,7 +229,7 @@ void IGGA::run()
         // Local search
         double rf = (double) rand() / (RAND_MAX + 1.0 );
         Scheduler* s = nullptr;
-//        printf("rf %f jp %f\n", rf, _jp);
+        printf("rf %f jp %f\n", rf, _jp);
         if(rf < _jp)
         {
             s = new CDJS(pi_new, _factory);
@@ -217,7 +242,7 @@ void IGGA::run()
         s->run();
         Jobs pi_purown = s->get_result();
         unsigned pi_purown_cost = s->get_cost();
-//        printf("count %zu pi purown %u pi best %u pi new %u\n", count, pi_purown_cost, pi_best_cost, pi_new_cost);
+        printf("count %zu pi purown %u pi best %u pi new %u\n", count, pi_purown_cost, pi_best_cost, pi_new_cost);
 
         delete s;
         s = nullptr;
@@ -265,7 +290,7 @@ void IGGA::run()
         ++count;
     }
 
-    _factory.add_jobs(_jobs);
+    _factory.add_jobs(pi_best);
 }
 
 bool IGGA::_is_accept(unsigned pi_purown, unsigned pi_new) const
