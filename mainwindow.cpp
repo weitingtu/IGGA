@@ -267,13 +267,13 @@ void MainWindow::_run() const
 
         scheduler->run();
         job_sets.push_back(scheduler->get_result());
+        iterations.push_back(scheduler->get_count());
         delete scheduler;
         scheduler = nullptr;
 
         times.push_back(t.elapsed());
     }
 
-    iterations.resize(job_sets.size(), 0);
 
     QFileInfo file_info(QString(_r.get_file_name().c_str()));
 

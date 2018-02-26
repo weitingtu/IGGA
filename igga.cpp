@@ -192,9 +192,9 @@ void IGGA::run()
     const unsigned max_count = _jobs.size() * 200;
     const unsigned max_non_improve_count = 100;
 
-    unsigned count = 0;
+    _count = 0;
     unsigned non_improve_count = 0;
-    while(count < max_count && non_improve_count < max_non_improve_count)
+    while(_count < max_count && non_improve_count < max_non_improve_count)
     {
         Jobs pi_incumbent;
         std::vector<Jobs> others;
@@ -267,7 +267,7 @@ void IGGA::run()
                 pi_best_cost = pi_purown_cost;
             }
         }
-        ++count;
+        ++_count;
     }
 
     _factory.add_jobs(pi_best);

@@ -14,10 +14,12 @@ public:
 
     const Jobs& get_result() const { return _factory.get_jobs(); }
     unsigned get_cost() const { return _factory.get_cost(); }
+    unsigned get_count() const { return _count; }
 
 protected:
     Jobs    _jobs;
     Factory _factory;
+    unsigned _count;
 };
 
 #endif // SCHEDULER_H

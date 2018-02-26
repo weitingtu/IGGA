@@ -24,10 +24,10 @@ void IG::run()
     const unsigned max_count = _jobs.size() * 200;
     const unsigned max_non_improve_count = 100;
 
-    unsigned count = 0;
+    _count = 0;
     unsigned non_improve_count = 0;
     unsigned t = _t0;
-    while(count < max_count && non_improve_count < max_non_improve_count)
+    while(_count < max_count && non_improve_count < max_non_improve_count)
     {
         ConsDes consdes(_d, neh.get_result(), _factory);
         consdes.run();
@@ -47,8 +47,8 @@ void IG::run()
                 pi_best_cost = consdes.get_cost();
             }
         }
-        ++count;
-        if(count % _gamma == 0)
+        ++_count;
+        if(_count % _gamma == 0)
         {
             t = _alpha * t;
         }
