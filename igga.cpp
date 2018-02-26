@@ -51,14 +51,21 @@ void Init::init(const Jobs &jobs, const Factory &factory)
     _costs.push_back(ls.get_cost());
     _costs.push_back(cfi.get_cost());
 
-    unsigned total_cost = std::accumulate(_costs.begin(), _costs.end(), 0);
+    std::vector<double> fits(_costs.size(), 0.0);
+
+    for(size_t i = 0; i < _costs.size();++i)
+    {
+        fits.at(i) = 1.0 / (double)_costs.at(i);
+    }
+
+    double total_fits = std::accumulate(fits.begin(), fits.end(), 0);
 
     _cp.clear();
-    _cp.resize(_costs.size(), 0.0);
-    _cp.at(0) = ((double) _costs.at(0)) / total_cost;
-    for(size_t i = 1;i < _costs.size(); ++i)
+    _cp.resize(fits.size(), 0.0);
+    _cp.at(0) = fits.at(0) / total_fits;
+    for(size_t i = 1;i < fits.size(); ++i)
     {
-        _cp.at(i) = _cp.at(i - 1) + ((double) _costs.at(i)) / total_cost;
+        _cp.at(i) = _cp.at(i - 1) + fits.at(i) / total_fits;
     }
 }
 
