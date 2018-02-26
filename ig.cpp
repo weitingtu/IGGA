@@ -63,5 +63,5 @@ bool IG::_is_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const
     double ap    = exp( -( ( pi_purown - pi_new ) / t ) );
     double alpha = (double) rand() / (RAND_MAX + 1.0 );
 
-    return ap < alpha;
+    return alpha < ap;
 }
