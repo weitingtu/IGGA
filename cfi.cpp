@@ -168,5 +168,5 @@ void CFI::run()
     Jobs pi = _isa();
     pi = _neh(pi);
     _factory.add_jobs(pi);
-    _factory.print();
+//    _factory.print();
 }

@@ -138,5 +138,5 @@ void LS::run()
         }
     }
     _factory.add_jobs(best);
-    _factory.print();
+//    _factory.print();
 }

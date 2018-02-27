@@ -211,9 +211,6 @@ void MainWindow::_run() const
 
     for(size_t i = 0; i < _r.size();++i)
     {
-        QTime t;
-        t.start();
-
         Scheduler* scheduler = nullptr;
 
         if(s == _igga_act)
@@ -265,13 +262,17 @@ void MainWindow::_run() const
             return;
         }
 
+        QTime t;
+        t.start();
+
         scheduler->run();
+
+        times.push_back(t.elapsed());
+
         job_sets.push_back(scheduler->get_result());
         iterations.push_back(scheduler->get_count());
         delete scheduler;
         scheduler = nullptr;
-
-        times.push_back(t.elapsed());
     }
 
 

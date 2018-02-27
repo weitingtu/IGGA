@@ -165,7 +165,7 @@ Jobs IGGA::_crossvoer(const Jobs& pi_new, const Jobs& jobs)
     Q_ASSERT(pi.size() == jobs.size());
 
     _factory.add_jobs(pi);
-    _factory.print();
+//    _factory.print();
 
     return pi;
 }

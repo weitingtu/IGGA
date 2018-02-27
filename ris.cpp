@@ -80,5 +80,5 @@ void RIS::run()
     }
 
     _factory.add_jobs(pi_purown);
-    _factory.print();
+//    _factory.print();
 }
