@@ -291,101 +291,19 @@ void MainWindow::_test_cost_function() const
 
     f.add_jobs(jobs);
     f.print();
-}
 
-void MainWindow::_test_neh() const
-{
-    Factory f(5);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = { 5,  9,  8, 10,  1};
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = { 9,  3, 10,  1,  8};
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = { 9,  4,  5,  8,  6};
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = { 4,  8,  8,  7,  2};
-
-    NEH neh({j0, j1, j2, j3}, f);
-    neh.run();
-}
-
-void MainWindow::_test_ph1() const
-{
-    Jobs jobs = _creat_test_jobs();
-    Factory f(jobs.at(0).processing_times.size());
-
-    PH1 ph1(jobs, f);
-    ph1.run();
-}
-
-void MainWindow::_test_fnm() const
-{
-    Jobs jobs = _creat_test_jobs();
-    Factory f(jobs.at(0).processing_times.size());
-
-    FNM fnm(jobs, f);
-    fnm.run();
-}
-
-void MainWindow::_test_ls() const
-{
-    Factory f(5);
-    Job j0;
-    j0.id = 0;
-    j0.processing_times = {  2,  5,  6,  8,  7 };
-    Job j1;
-    j1.id = 1;
-    j1.processing_times = {  3,  7,  2, 10,  4 };
-    Job j2;
-    j2.id = 2;
-    j2.processing_times = {  1,  2,  7,  6,  3 };
-    Job j3;
-    j3.id = 3;
-    j3.processing_times = {  4,  9,  5,  7,  8 };
-    Job j4;
-    j4.id = 4;
-    j4.processing_times = {  6,  8,  4,  5,  6 };
-
-    LS ls({j0, j1, j2, j3, j4}, f);
-    ls.run();
-}
-
-void MainWindow::_test_cfi() const
-{
-    Jobs jobs = _creat_test_jobs();
-    Factory f(jobs.at(0).processing_times.size());
-
-    CFI cfi(jobs, f);
-    cfi.run();
-}
-
-void MainWindow::_test_cdjs() const
-{
-    Jobs jobs = _creat_test_jobs();
-    Job j5;
-    j5.id = 5;
-    j5.processing_times = { 12, 14, 15, 11 };
-    jobs.push_back(j5);
-    Factory f(jobs.at(0).processing_times.size());
-
-    Jobs pi_best {jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3), jobs.at(2), jobs.at(5)}; // 2, 1, 5, 4, 3, 6
-    CDJS cdjs(pi_best, f);
-    cdjs.run();
-}
-
-void MainWindow::_test_ris() const
-{
-    Jobs jobs = _creat_test_jobs();
-    Factory f(jobs.at(0).processing_times.size());
-
-    Jobs pi_new  = {jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3), jobs.at(2)}; // 2, 1, 5, 4, 3
-    Jobs pi_best = {jobs.at(2), jobs.at(1), jobs.at(0), jobs.at(4), jobs.at(3)}; // 3, 2, 1, 5, 4
-    RIS ris(pi_new, pi_best, f);
-    ris.run();
+//    SeqFactory sf;
+//    sf.init(_r.get_jobs(0));
+//    const Jobs& jj = _r.get_jobs(0);
+//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(1), jj.at(0), jj.at(4), jj.at(3)}));
+//    printf("tct %u\n", sf.tct({jj.at(0), jj.at(2), jj.at(1)}));
+//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(0), jj.at(1)}));
+//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(1), jj.at(0)}));
+//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(1), jj.at(0), jj.at(4), jj.at(3)}));
+//    printf("tct %u\n", sf.seq_tct({jj.at(0), jj.at(2), jj.at(1)}));
+//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(0), jj.at(1)}));
+//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(1), jj.at(0)}));
+//    return;
 }
 
 void MainWindow::_verbose(bool checked) const

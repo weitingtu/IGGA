@@ -2,6 +2,7 @@
 #define JOB_H
 
 #include <vector>
+#include <list>
 #include <algorithm>
 #include <tuple>
 
@@ -32,6 +33,7 @@ private:
 };
 
 using Jobs = std::vector<Job>;
+using JobsSeq = std::list<Job>;
 
 void print_jobs(const Jobs& jobs );
 

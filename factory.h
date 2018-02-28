@@ -24,4 +24,21 @@ private:
     Jobs                  _jobs;
 };
 
+class SeqFactory
+{
+public:
+    SeqFactory(): _d_matrix() {}
+
+    void init(const Jobs& jobs);
+    void print() const;
+    unsigned tct(const Jobs& jobs) const;
+    unsigned seq_tct(const JobsSeq& jobs) const;
+
+private:
+    unsigned _d(const Job& ji, const Job& jj) const;
+
+    std::vector<std::vector<unsigned > > _d_matrix;
+
+};
+
 #endif // FACTORY_H

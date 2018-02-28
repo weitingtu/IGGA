@@ -12,6 +12,7 @@
 #include "possibility.h"
 #include <stdlib.h>
 #include <QtGlobal>
+#include <QTime>
 
 class Init {
 public:
@@ -193,7 +194,14 @@ void IGGA::run()
     const unsigned max_non_improve_count = 100;
 
     _count = 0;
+    unsigned cdjs_count = 0;
+    unsigned ris_count = 0;
     unsigned non_improve_count = 0;
+    unsigned consdes_time = 0;
+    unsigned cdjs_time = 0;
+    unsigned ris_time = 0;
+    unsigned local_search_time = 0;
+    unsigned crossvoer_time = 0;
     while(_count < max_count && non_improve_count < max_non_improve_count)
     {
         Jobs pi_incumbent;
@@ -202,7 +210,12 @@ void IGGA::run()
 
         // Construct/Destruct
         ConsDes consdes(_d, pi_incumbent, _factory);
-        consdes.run();
+        {
+            QTime t;
+            t.start();
+            consdes.run();
+            consdes_time += t.elapsed();
+        }
         Jobs pi_new = consdes.get_result();
         unsigned pi_new_cost = consdes.get_cost();
 
@@ -219,7 +232,23 @@ void IGGA::run()
             s = new RIS(pi_new, pi_best, _factory);
         }
 
-        s->run();
+        {
+            QTime t;
+            t.start();
+            s->run();
+            unsigned tt = t.elapsed();
+            local_search_time += tt;
+            if(rf < _jp)
+            {
+                cdjs_time += tt;
+                ++cdjs_count;
+            }
+            else
+            {
+                ris_time += tt;
+                ++ris_count;
+            }
+        }
         Jobs pi_purown = s->get_result();
         unsigned pi_purown_cost = s->get_cost();
 //        printf("count %zu pi purown %u pi best %u pi new %u\n", count, pi_purown_cost, pi_best_cost, pi_new_cost);
@@ -229,7 +258,14 @@ void IGGA::run()
 
         if(pi_purown_cost < pi_new_cost)
         {
-            std::vector<Jobs> r = _crossvoer(pi_purown, others);
+            std::vector<Jobs> r;
+            {
+                QTime t;
+                t.start();
+//                std::vector<Jobs> r = _crossvoer(pi_purown, others);
+                r = _crossvoer(pi_purown, others);
+                crossvoer_time += t.elapsed();
+            }
             bool accept = false;
 
             if(pi_purown_cost < pi_best_cost)
@@ -269,6 +305,14 @@ void IGGA::run()
         }
         ++_count;
     }
+    printf("count     : %u\n", _count);
+    printf("cdjs count: %u\n", cdjs_count);
+    printf("ris count : %u\n", ris_count);
+    printf("Construc Destruct: %u\n", consdes_time);
+    printf("Local search     : %u\n", local_search_time);
+    printf("CDJS             : %u\n", cdjs_time);
+    printf("RIS              : %u\n", ris_time);
+    printf("Crossover        : %u\n", crossvoer_time);
 
     _factory.add_jobs(pi_best);
 }

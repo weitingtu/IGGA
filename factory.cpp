@@ -81,3 +81,93 @@ unsigned Factory::get_cost() const
     }
     return cost;
 }
+
+unsigned SeqFactory::_d(const Job& ji, const Job& jj) const
+{
+    int max = std::numeric_limits<int>::min();
+    int jj_total = std::accumulate(jj.processing_times.begin(), jj.processing_times.end(), 0);
+    size_t m = ji.processing_times.size();
+    for(size_t i = 0; i < m; ++i)
+    {
+        int jj_sub = std::accumulate(jj.processing_times.begin(), jj.processing_times.begin() + i, 0);
+        int ji_total = std::accumulate(ji.processing_times.begin() + i + 1, ji.processing_times.end(), 0);
+
+        max = std::max(max, jj_total - jj_sub - ji_total);
+    }
+    return (unsigned) max;
+}
+
+void SeqFactory::init(const Jobs& jobs)
+{
+    _d_matrix.resize(jobs.size());
+    for(size_t i = 0; i < _d_matrix.size(); ++i)
+    {
+        _d_matrix.at(i).resize(jobs.size(), 0);
+    }
+
+    for(size_t i = 0; i < jobs.size(); ++i)
+    {
+        for(size_t j = 0; j < jobs.size(); ++j)
+        {
+            if( i != j)
+            {
+                _d_matrix.at(i).at(j) = _d(jobs.at(i), jobs.at(j));
+            }
+        }
+    }
+}
+
+void SeqFactory::print() const
+{
+    for(size_t i = 0; i < _d_matrix.size(); ++i)
+    {
+        for(size_t j = 0; j < _d_matrix.at(i).size(); ++j)
+        {
+            printf("%u ", _d_matrix.at(i).at(j));
+        }
+        printf("\n");
+    }
+}
+
+unsigned SeqFactory::tct(const Jobs& jobs) const
+{
+    if(jobs.empty())
+    {
+        return 0;
+    }
+
+    unsigned cost = 0;
+    const Job& j0 = jobs.front();
+    cost += jobs.size() * std::accumulate(j0.processing_times.begin(), j0.processing_times.end(), 0 );
+
+    for(size_t j = 1; j < jobs.size(); ++j)
+    {
+        const Job& jj_1 = jobs.at(j - 1);
+        const Job& jj   = jobs.at(j);
+        cost += (jobs.size() - j) * _d_matrix.at(jj_1.id).at(jj.id);
+    }
+
+    return cost;
+}
+
+unsigned SeqFactory::seq_tct(const JobsSeq& jobs) const
+{
+    if(jobs.empty())
+    {
+        return 0;
+    }
+
+    unsigned cost = 0;
+    auto ite = jobs.begin();
+    const Job& j0 = *ite;
+    cost += jobs.size() * std::accumulate(j0.processing_times.begin(), j0.processing_times.end(), 0 );
+
+    for(size_t j = 1; j < jobs.size(); ++j)
+    {
+        const Job& jj_1 = *(ite);
+        const Job& jj   = *(++ite);
+        cost += (jobs.size() - j) * _d_matrix.at(jj_1.id).at(jj.id);
+    }
+
+    return cost;
+}

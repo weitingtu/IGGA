@@ -30,13 +30,6 @@ private:
     void _create_menus();
     void _create_layout();
     void _test_cost_function() const;
-    void _test_neh() const;
-    void _test_ph1() const;
-    void _test_fnm() const;
-    void _test_ls() const;
-    void _test_cfi() const;
-    void _test_cdjs() const;
-    void _test_ris() const;
 
     QMenu*   _file_menu;
     QMenu*   _run_menu;
