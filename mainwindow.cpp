@@ -152,7 +152,8 @@ void MainWindow::_create_layout()
     _jp_spinbox->setPrefix("jp: ");
     _jp_spinbox->setMinimum(0.0);
     _jp_spinbox->setMaximum(1.0);
-    _jp_spinbox->setSingleStep(0.01);
+    _jp_spinbox->setDecimals(3);
+    _jp_spinbox->setSingleStep(0.001);
     _jp_spinbox->setValue(0.1);
 
     _t0_spinbox = new QSpinBox();
