@@ -222,7 +222,6 @@ void IGGA::run()
         // Local search
         double rf = (double) rand() / (RAND_MAX + 1.0 );
         Scheduler* s = nullptr;
-//        printf("rf %f jp %f\n", rf, _jp);
         if(rf < _jp)
         {
             s = new CDJS(pi_new, _factory);
@@ -251,7 +250,6 @@ void IGGA::run()
         }
         Jobs pi_purown = s->get_result();
         unsigned pi_purown_cost = s->get_cost();
-//        printf("count %zu pi purown %u pi best %u pi new %u\n", count, pi_purown_cost, pi_best_cost, pi_new_cost);
 
         delete s;
         s = nullptr;

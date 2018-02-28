@@ -9,6 +9,7 @@ public:
     RIS(const Jobs& jobs, const Jobs& pi_best, const Factory& factory);
 
     virtual void run();
+    void run2();
 private:
     Jobs    _pi_best;
 };
