@@ -59,7 +59,7 @@ void Init::init(const Jobs &jobs, const Factory &factory)
         fits.at(i) = 1.0 / (double)_costs.at(i);
     }
 
-    double total_fits = std::accumulate(fits.begin(), fits.end(), 0);
+    double total_fits = std::accumulate(fits.begin(), fits.end(), 0.0);
 
     _cp.clear();
     _cp.resize(fits.size(), 0.0);
@@ -68,6 +68,11 @@ void Init::init(const Jobs &jobs, const Factory &factory)
     {
         _cp.at(i) = _cp.at(i - 1) + fits.at(i) / total_fits;
     }
+
+    printf("ph1 cost %u %.2f - %.2f\n", ph1.get_cost(), 0.0, _cp.at(0));
+    printf("fnm cost %u %.2f - %.2f\n", fnm.get_cost(), _cp.at(0), _cp.at(1));
+    printf("ls  cost %u %.2f - %.2f\n", ls.get_cost(),  _cp.at(1), _cp.at(2));
+    printf("cfi cost %u %.2f - %.2f\n", cfi.get_cost(), _cp.at(2), _cp.at(3));
 }
 
 void Init::get_best(Jobs& best, unsigned& best_cost) const
@@ -260,7 +265,6 @@ void IGGA::run()
             {
                 QTime t;
                 t.start();
-//                std::vector<Jobs> r = _crossvoer(pi_purown, others);
                 r = _crossvoer(pi_purown, others);
                 crossvoer_time += t.elapsed();
             }
