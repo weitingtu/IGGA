@@ -69,10 +69,10 @@ void Init::init(const Jobs &jobs, const Factory &factory)
         _cp.at(i) = _cp.at(i - 1) + fits.at(i) / total_fits;
     }
 
-    printf("ph1 cost %u %.2f - %.2f\n", ph1.get_cost(), 0.0, _cp.at(0));
-    printf("fnm cost %u %.2f - %.2f\n", fnm.get_cost(), _cp.at(0), _cp.at(1));
-    printf("ls  cost %u %.2f - %.2f\n", ls.get_cost(),  _cp.at(1), _cp.at(2));
-    printf("cfi cost %u %.2f - %.2f\n", cfi.get_cost(), _cp.at(2), _cp.at(3));
+    io_debug("ph1 cost %u %.2f - %.2f\n", ph1.get_cost(), 0.0, _cp.at(0));
+    io_debug("fnm cost %u %.2f - %.2f\n", fnm.get_cost(), _cp.at(0), _cp.at(1));
+    io_debug("ls  cost %u %.2f - %.2f\n", ls.get_cost(),  _cp.at(1), _cp.at(2));
+    io_debug("cfi cost %u %.2f - %.2f\n", cfi.get_cost(), _cp.at(2), _cp.at(3));
 }
 
 void Init::get_best(Jobs& best, unsigned& best_cost) const
@@ -119,9 +119,16 @@ void Init::select(Jobs& pi_incumbent, std::vector<Jobs>& others)
             break;
         }
     }
-    io_debug("random possibility %f, selected index %u\n", rf, (unsigned)selected_idx);
 
     pi_incumbent = _job_sets.at(selected_idx);
+
+    io_debug("Rf %.2f, select %s(%u) %u\n",
+             rf,
+             selected_idx == 0 ? "ph1"
+             : selected_idx == 1 ? "fnm"
+             : selected_idx == 2 ? "ls" : "cfi",
+             (unsigned)selected_idx,
+             _costs.at(selected_idx));
 
     others.clear();
     for(size_t i = 0; i < _job_sets.size(); ++i)
@@ -171,7 +178,6 @@ Jobs IGGA::_crossvoer(const Jobs& pi_new, const Jobs& jobs)
     Q_ASSERT(pi.size() == jobs.size());
 
     _factory.add_jobs(pi);
-//    _factory.print();
 
     return pi;
 }
@@ -189,6 +195,9 @@ std::vector<Jobs> IGGA::_crossvoer(const Jobs& pi_new, const std::vector<Jobs>& 
 
 void IGGA::run()
 {
+    SeqFactory sf;
+    sf.init(_jobs);
+
     Init init;
     init.init(_jobs, _factory);
     Jobs pi_best;
@@ -209,6 +218,8 @@ void IGGA::run()
     unsigned crossvoer_time = 0;
     while(_count < max_count && non_improve_count < max_non_improve_count)
     {
+        io_debug("Iteration %u (non-improve %u) pi best %u\n",
+                 (unsigned)_count, (unsigned)non_improve_count, pi_best_cost);
         Jobs pi_incumbent;
         std::vector<Jobs> others;
         init.select(pi_incumbent, others);
@@ -223,6 +234,7 @@ void IGGA::run()
         }
         Jobs pi_new = consdes.get_result();
         unsigned pi_new_cost = consdes.get_cost();
+        io_debug("Cons/Des %u -> %u\n", sf.tct(pi_incumbent), pi_new_cost);
 
         // Local search
         double rf = (double) rand() / (RAND_MAX + 1.0 );
@@ -230,10 +242,12 @@ void IGGA::run()
         if(rf < _jp)
         {
             s = new CDJS(pi_new, _factory);
+            io_debug("Rf %.2f < %.2f, select CDJS ", rf, _jp);
         }
         else
         {
             s = new RIS(pi_new, pi_best, _factory);
+            io_debug("Rf %.2f >= %.2f, select RIS ", rf, _jp);
         }
 
         {
@@ -259,6 +273,8 @@ void IGGA::run()
         delete s;
         s = nullptr;
 
+        io_debug("pi' %u -> %u\n", pi_new_cost, pi_purown_cost);
+
         if(pi_purown_cost < pi_new_cost)
         {
             std::vector<Jobs> r;
@@ -270,8 +286,18 @@ void IGGA::run()
             }
             bool accept = false;
 
+            io_debug("pi best %u ", pi_best_cost);
+            io_debug("pi' %u ", pi_purown_cost);
+            io_debug("crossover ");
+            for(size_t i = 0; i < r.size(); ++i)
+            {
+                io_debug("(%u) %u ", (unsigned)i, sf.tct(r.at(i)));
+            }
+            io_debug("\n");
+
             if(pi_purown_cost < pi_best_cost)
             {
+                io_debug("Accept better pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
                 pi_best = pi_purown;
                 pi_best_cost = pi_purown_cost;
                 non_improve_count = 0;
@@ -284,15 +310,18 @@ void IGGA::run()
                 unsigned cost = _factory.get_cost();
                 if(cost < pi_best_cost)
                 {
+                    io_debug("Accept %u crossover cost %u -> %u\n", (unsigned)i, pi_best_cost, cost);
                     pi_best = r.at(i);
                     pi_best_cost = cost;
                     non_improve_count = 0;
                     accept = true;
                 }
             }
+
             if(!accept)
             {
                 ++non_improve_count;
+                io_debug("Don't accept pi' and corssvoer pi'\n");
             }
         }
         else
@@ -301,8 +330,13 @@ void IGGA::run()
             ++non_improve_count;
             if(_is_accept(pi_purown_cost, pi_new_cost))
             {
+                io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
                 pi_best = pi_purown;
                 pi_best_cost = pi_purown_cost;
+            }
+            else
+            {
+                io_debug("Don't accept bad pi'\n");
             }
         }
         ++_count;

@@ -98,7 +98,6 @@ Jobs CFI::_isa()
     std::set<unsigned> job_set;
     while(pi.size() < _jobs.size() - 1)
     {
-        io_debug("Iteration %d\n", (int)pi.size());
         unsigned min_job_idx              = std::numeric_limits<unsigned>::max();
         unsigned min_index_function_value = std::numeric_limits<unsigned>::max();
         for(size_t i = 0; i < _jobs.size(); ++i)
@@ -108,14 +107,12 @@ Jobs CFI::_isa()
                 continue;
             }
             unsigned index_function_value = _get_index_function_value(pi, i);
-            io_debug("f(%u) = %u %f\n", i, index_function_value, (double)index_function_value / (_jobs.size() - pi.size() - 1));
             if(index_function_value < min_index_function_value)
             {
                 min_index_function_value = index_function_value;
                 min_job_idx = i;
             }
         }
-        io_debug("min f(%u) = %u %f\n", min_job_idx, min_index_function_value, (double) min_index_function_value / (_jobs.size() - pi.size() - 1));
         pi.push_back(_jobs.at(min_job_idx));
         job_set.insert(min_job_idx);
     }
