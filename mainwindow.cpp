@@ -52,6 +52,7 @@ MainWindow::MainWindow(QWidget *parent)
       _run_menu(nullptr),
       _open_act(nullptr),
       _igga_act(nullptr),
+      _igga_sa_act(nullptr),
       _ig_act(nullptr),
       _cfi_act(nullptr),
       _consdef_act(nullptr),
@@ -95,6 +96,8 @@ void MainWindow::_create_actions()
     connect(_open_act, SIGNAL(triggered(bool)), this, SLOT(_open()));
     _igga_act = new QAction(tr("IGGA"), this);
     connect(_igga_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _igga_sa_act = new QAction(tr("IGGA-SA"), this);
+    connect(_igga_sa_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _ig_act = new QAction(tr("IG"), this);
     connect(_ig_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _cfi_act = new QAction(tr("CFI"), this);
@@ -126,6 +129,7 @@ void MainWindow::_create_menus()
     _file_menu->addAction(_verbose_act);
     _run_menu = menuBar()->addMenu(tr("&Run"));
     _run_menu->addAction(_igga_act);
+    _run_menu->addAction(_igga_sa_act);
     _run_menu->addAction(_ig_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
@@ -219,6 +223,12 @@ void MainWindow::_run() const
         {
             scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), _d_spinbox->value(), _jp_spinbox->value());
         }
+        else if(s == _igga_sa_act)
+        {
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),
+                                 _d_spinbox->value(), _jp_spinbox->value(),
+                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
+        }
         else if(s == _ig_act)
         {
             scheduler = new IG(_r.get_jobs(i), _r.get_factory(i),
@@ -291,19 +301,6 @@ void MainWindow::_test_cost_function() const
 
     f.add_jobs(jobs);
     f.print();
-
-//    SeqFactory sf;
-//    sf.init(_r.get_jobs(0));
-//    const Jobs& jj = _r.get_jobs(0);
-//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(1), jj.at(0), jj.at(4), jj.at(3)}));
-//    printf("tct %u\n", sf.tct({jj.at(0), jj.at(2), jj.at(1)}));
-//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(0), jj.at(1)}));
-//    printf("tct %u\n", sf.tct({jj.at(2), jj.at(1), jj.at(0)}));
-//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(1), jj.at(0), jj.at(4), jj.at(3)}));
-//    printf("tct %u\n", sf.seq_tct({jj.at(0), jj.at(2), jj.at(1)}));
-//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(0), jj.at(1)}));
-//    printf("tct %u\n", sf.seq_tct({jj.at(2), jj.at(1), jj.at(0)}));
-//    return;
 }
 
 void MainWindow::_verbose(bool checked) const

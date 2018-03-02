@@ -57,7 +57,6 @@ void IG::run()
     _factory.add_jobs(pi_best);
 }
 
-
 bool IG::_is_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const
 {
     double ap    = exp( -( (double)( pi_purown - pi_new ) / t ) );

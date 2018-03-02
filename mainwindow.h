@@ -35,6 +35,7 @@ private:
     QMenu*   _run_menu;
     QAction* _open_act;
     QAction* _igga_act;
+    QAction* _igga_sa_act;
     QAction* _ig_act;
     QAction* _cfi_act;
     QAction* _consdef_act;
