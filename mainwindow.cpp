@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
       _verbose_act(nullptr),
       _d_spinbox(nullptr),
       _jp_spinbox(nullptr),
+      _t_spinbox(nullptr),
       _t0_spinbox(nullptr),
       _alpha_spinbox(nullptr),
       _gamma_spinbox(nullptr),
@@ -160,6 +161,12 @@ void MainWindow::_create_layout()
     _jp_spinbox->setSingleStep(0.001);
     _jp_spinbox->setValue(0.1);
 
+    _t_spinbox = new QSpinBox();
+    _t_spinbox->setPrefix("t: ");
+    _t_spinbox->setMinimum(0);
+    _t_spinbox->setMaximum(100);
+    _t_spinbox->setValue(30);
+
     _t0_spinbox = new QSpinBox();
     _t0_spinbox->setPrefix("t0: ");
     _t0_spinbox->setMinimum(0);
@@ -181,10 +188,11 @@ void MainWindow::_create_layout()
     QGridLayout* layout = new QGridLayout(w);
     layout->addWidget(_d_spinbox, 0, 0);
     layout->addWidget(_jp_spinbox, 1, 0);
-    layout->addWidget(_t0_spinbox, 2, 0);
-    layout->addWidget(_alpha_spinbox, 3, 0);
-    layout->addWidget(_gamma_spinbox, 4, 0);
-    layout->setRowStretch(5, 100);
+    layout->addWidget(_t_spinbox, 2, 0);
+    layout->addWidget(_t0_spinbox, 3, 0);
+    layout->addWidget(_alpha_spinbox, 4, 0);
+    layout->addWidget(_gamma_spinbox, 5, 0);
+    layout->setRowStretch(6, 100);
     layout->setColumnStretch(1, 100);
 }
 
@@ -221,12 +229,13 @@ void MainWindow::_run() const
 
         if(s == _igga_act)
         {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), _d_spinbox->value(), _jp_spinbox->value());
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),
+                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
         }
         else if(s == _igga_sa_act)
         {
             scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),
-                                 _d_spinbox->value(), _jp_spinbox->value(),
+                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
                                  _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
         }
         else if(s == _ig_act)

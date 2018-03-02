@@ -13,6 +13,7 @@ private:
     bool _is_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const;
 
     const unsigned _d;
+    const unsigned _t;
     const unsigned _t0;
     const double   _alpha;
     const unsigned _gamma;

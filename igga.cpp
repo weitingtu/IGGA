@@ -148,10 +148,11 @@ void Init::select(Jobs& pi_incumbent, std::vector<Jobs>& others)
     }
 }
 
-IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp)
+IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp, unsigned t)
     : Scheduler(jobs, factory),
       _d(d),    // 解構所抽出之工件數
       _jp(jp),  // 跳躍機率設定
+      _t(t),
       _t0(0),
       _alpha(0),
       _gamma(0)
@@ -159,11 +160,12 @@ IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp)
 }
 
 IGGA::IGGA(const Jobs &jobs, const Factory &factory,
-           unsigned d, double jp,
+           unsigned d, double jp, unsigned t,
            unsigned t0, unsigned alpha, unsigned gamma)
     : Scheduler(jobs, factory),
       _d(d),    // 解構所抽出之工件數
       _jp(jp),  // 跳躍機率設定
+      _t(t),
       _t0(t0),
       _alpha(alpha),
       _gamma(gamma)
@@ -229,22 +231,21 @@ void IGGA::run()
     init.get_best(pi_best, pi_best_cost);
 
     // 終止條件設定
-    const unsigned max_count = _jobs.size() * 200;
-    const unsigned max_non_improve_count = 100;
+    const unsigned max_run_time = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
     unsigned non_improve_count = 0;
     unsigned t = _t0;
 
-    unsigned cdjs_count = 0;
-    unsigned ris_count = 0;
-    unsigned consdes_time = 0;
-    unsigned cdjs_time = 0;
-    unsigned ris_time = 0;
-    unsigned local_search_time = 0;
-    unsigned crossvoer_time = 0;
-    while(_count < max_count && non_improve_count < max_non_improve_count)
+    unsigned run_time = 0;
+    unsigned convergence_time = 0;
+
+    QTime time;
+    time.start();
+
+    while( run_time < max_run_time)
     {
+        time.restart();
         io_debug("Iteration %u (non-improve %u) pi best %u\n",
                  (unsigned)_count, (unsigned)non_improve_count, pi_best_cost);
         Jobs pi_incumbent;
@@ -253,12 +254,8 @@ void IGGA::run()
 
         // Construct/Destruct
         ConsDes consdes(_d, pi_incumbent, _factory);
-        {
-            QTime t;
-            t.start();
-            consdes.run();
-            consdes_time += t.elapsed();
-        }
+        consdes.run();
+
         Jobs pi_new = consdes.get_result();
         unsigned pi_new_cost = consdes.get_cost();
         io_debug("Cons/Des %u -> %u\n", sf.tct(pi_incumbent), pi_new_cost);
@@ -277,23 +274,7 @@ void IGGA::run()
             io_debug("Rf %.2f >= %.2f, select RIS ", rf, _jp);
         }
 
-        {
-            QTime t;
-            t.start();
-            s->run();
-            unsigned tt = t.elapsed();
-            local_search_time += tt;
-            if(rf < _jp)
-            {
-                cdjs_time += tt;
-                ++cdjs_count;
-            }
-            else
-            {
-                ris_time += tt;
-                ++ris_count;
-            }
-        }
+        s->run();
         Jobs pi_purown = s->get_result();
         unsigned pi_purown_cost = s->get_cost();
 
@@ -303,17 +284,10 @@ void IGGA::run()
         io_debug("pi' %u -> %u\n", pi_new_cost, pi_purown_cost);
 
         // 局部搜尋完所得排序pi_purown與建構完之排序pi_new做比較
+        bool accept = false;
         if(pi_purown_cost < pi_new_cost)
         {
-            std::vector<Jobs> r;
-            {
-                QTime t;
-                t.start();
-                r = _crossvoer(pi_purown, others);
-                crossvoer_time += t.elapsed();
-            }
-            bool accept = false;
-
+            std::vector<Jobs> r = _crossvoer(pi_purown, others);
             io_debug("pi best %u ", pi_best_cost);
             io_debug("pi' %u ", pi_purown_cost);
             io_debug("crossover ");
@@ -356,8 +330,8 @@ void IGGA::run()
         {
             // Try to Accept
             ++non_improve_count;
-            if((0 == _gamma && _is_accept(pi_purown_cost, pi_new_cost))
-                    || (0 != _gamma && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
+            if(((0 == _gamma) && _is_accept(pi_purown_cost, pi_new_cost))
+                    || ((0 != _gamma) && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
             {
                 io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
                 pi_best = pi_purown;
@@ -369,19 +343,23 @@ void IGGA::run()
             }
         }
         ++_count;
-        if(_count % _gamma == 0)
+        if(0 != _gamma && _count % _gamma == 0)
         {
             t = _alpha * t;
         }
+        run_time += time.elapsed();
+        if(accept)
+        {
+            convergence_time = run_time;
+        }
     }
-    printf("count     : %u\n", _count);
-    printf("cdjs count: %u\n", cdjs_count);
-    printf("ris count : %u\n", ris_count);
-    printf("Construc Destruct: %u msec\n", consdes_time);
-    printf("Local search     : %u msec\n", local_search_time);
-    printf("CDJS             : %u msec\n", cdjs_time);
-    printf("RIS              : %u msec\n", ris_time);
-    printf("Crossover        : %u msec\n", crossvoer_time);
+    printf("summary\n");
+    printf("  count             : %u\n", _count);
+    printf("  non-improve count : %u\n", non_improve_count);
+    printf("  run time          : %u\n", run_time);
+    printf("  convergence time  : %u\n", convergence_time);
+    printf("  max run time      : %u\n", max_run_time);
+    printf("\n");
 
     _factory.add_jobs(pi_best);
 }
@@ -397,7 +375,7 @@ bool IGGA::_is_accept(unsigned pi_purown, unsigned pi_new) const
 
 bool IGGA::_is_sa_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const
 {
-    double ap    = exp( -( (double)( pi_purown - pi_new ) / t ) );
+    double ap    = exp( -( ((double)( pi_purown - pi_new )) / t ) );
     double alpha = (double) rand() / (RAND_MAX + 1.0 );
 
     return alpha < ap;

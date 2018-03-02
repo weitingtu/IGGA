@@ -48,6 +48,7 @@ private:
     QAction* _verbose_act;
     QSpinBox* _d_spinbox;
     QDoubleSpinBox* _jp_spinbox;
+    QSpinBox* _t_spinbox;
     QSpinBox* _t0_spinbox;
     QDoubleSpinBox* _alpha_spinbox;
     QSpinBox* _gamma_spinbox;

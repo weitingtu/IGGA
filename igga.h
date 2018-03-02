@@ -6,8 +6,8 @@
 class IGGA : public Scheduler
 {
 public:
-    IGGA(const Jobs& jobs, const Factory& factory, unsigned d, double jp);
-    IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp,
+    IGGA(const Jobs& jobs, const Factory& factory, unsigned d, double jp, unsigned t);
+    IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp, unsigned t,
          unsigned t0, unsigned alpha, unsigned gamma);
 
     virtual void run();
@@ -20,6 +20,7 @@ private:
 
     const unsigned _d;
     const double   _jp;
+    const unsigned _t;
     const unsigned _t0;
     const double   _alpha;
     const unsigned _gamma;

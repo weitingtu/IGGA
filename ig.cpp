@@ -3,10 +3,12 @@
 #include "consdes.h"
 #include "possibility.h"
 #include <stdlib.h>
+#include <QTime>
 
 IG::IG(const Jobs& jobs, const Factory& factory, unsigned d, unsigned t0, double alpha, unsigned gamma)
     : Scheduler(jobs, factory),
       _d(d),
+      _t(30),
       _t0(t0),
       _alpha(alpha),
       _gamma(gamma)
@@ -21,22 +23,31 @@ void IG::run()
     Jobs pi_best          = neh.get_result();
     unsigned pi_best_cost = neh.get_cost();
 
-    const unsigned max_count = _jobs.size() * 200;
-    const unsigned max_non_improve_count = 100;
+    const unsigned max_run_time = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
     unsigned non_improve_count = 0;
     unsigned t = _t0;
-    while(_count < max_count && non_improve_count < max_non_improve_count)
+
+    unsigned run_time = 0;
+    unsigned convergence_time = 0;
+
+    QTime time;
+    time.start();
+
+    while( run_time < max_run_time)
     {
+        time.restart();
         ConsDes consdes(_d, neh.get_result(), _factory);
         consdes.run();
         consdes.get_result();
+        bool accept = false;
         if(consdes.get_cost() < pi_best_cost)
         {
             non_improve_count = 0;
             pi_best = consdes.get_result();
             pi_best_cost = consdes.get_cost();
+            accept = true;
         }
         else
         {
@@ -48,11 +59,23 @@ void IG::run()
             }
         }
         ++_count;
-        if(_count % _gamma == 0)
+        if(0 != _gamma && _count % _gamma == 0)
         {
             t = _alpha * t;
         }
+        run_time += time.elapsed();
+        if(accept)
+        {
+            convergence_time = run_time;
+        }
     }
+    printf("summary\n");
+    printf("  count             : %u\n", _count);
+    printf("  non-improve count : %u\n", non_improve_count);
+    printf("  run time          : %u\n", run_time);
+    printf("  convergence time  : %u\n", convergence_time);
+    printf("  max run time      : %u\n", max_run_time);
+    printf("\n");
 
     _factory.add_jobs(pi_best);
 }
