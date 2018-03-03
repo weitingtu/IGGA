@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     scheduler.cpp \
     igga.cpp \
     possibility.cpp \
-    ig.cpp
+    ig.cpp \
+    ls_random.cpp
 
 HEADERS  += mainwindow.h \
     factory.h \
@@ -61,4 +62,5 @@ HEADERS  += mainwindow.h \
     scheduler.h \
     igga.h \
     possibility.h \
-    ig.h
+    ig.h \
+    ls_random.h

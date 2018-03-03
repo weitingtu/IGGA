@@ -35,6 +35,10 @@ private:
 using Jobs = std::vector<Job>;
 using JobsSeq = std::list<Job>;
 
+class SeqFactory;
+
 void print_jobs(const Jobs& jobs );
+void print_jobs(const Jobs& jobs, const SeqFactory& sf);
+void print_jobs(const JobsSeq& jobs, const SeqFactory& sf);
 
 #endif // JOB_H

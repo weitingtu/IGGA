@@ -6,7 +6,7 @@
 class CDJS : public Scheduler
 {
 public:
-    CDJS(const Jobs& jobs, const Factory& factory);
+    CDJS(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 };

@@ -6,7 +6,7 @@
 class ConsDes : public Scheduler
 {
 public:
-    ConsDes(unsigned d, const Jobs& jobs, const Factory& factory);
+    ConsDes(unsigned d, const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 

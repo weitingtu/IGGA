@@ -6,7 +6,7 @@
 class NEH : public Scheduler
 {
 public:
-    NEH(const Jobs& jobs, const Factory& factory);
+    NEH(const Jobs& jobs, const Factory& factory, const SeqFactory&sf);
 
     virtual void run();
     Jobs run(const Jobs& pi1);

@@ -1,61 +1,80 @@
 #include "ig.h"
 #include "neh.h"
 #include "consdes.h"
+#include "ls_random.h"
 #include "possibility.h"
 #include <stdlib.h>
 #include <QTime>
 
-IG::IG(const Jobs& jobs, const Factory& factory, unsigned d, unsigned t0, double alpha, unsigned gamma)
-    : Scheduler(jobs, factory),
+IG::IG(const Jobs& jobs, const Factory& factory, const SeqFactory &sf, unsigned d, unsigned t, unsigned t0, double alpha, unsigned gamma)
+    : Scheduler(jobs, factory, sf),
       _d(d),
-      _t(30),
+      _t(t),
       _t0(t0),
       _alpha(alpha),
-      _gamma(gamma)
+      _gamma(gamma),
+      _ls(false)
 {
+}
 
+IG::IG(const Jobs& jobs, const Factory& factory, const SeqFactory &sf, unsigned d, unsigned t, unsigned t0, double alpha, unsigned gamma, bool ls)
+    : Scheduler(jobs, factory, sf),
+      _d(d),
+      _t(t),
+      _t0(t0),
+      _alpha(alpha),
+      _gamma(gamma),
+      _ls(ls)
+{
 }
 
 void IG::run()
 {
-    NEH neh(_jobs, _factory);
+    QTime time;
+    time.start();
+
+    NEH neh(_jobs, _factory, _sf);
     neh.run();
     Jobs pi_best          = neh.get_result();
     unsigned pi_best_cost = neh.get_cost();
 
-    const unsigned max_run_time = _jobs.size() * _factory.get_machine_size() / 2 * _t;
+    const int max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
     unsigned non_improve_count = 0;
     unsigned t = _t0;
 
-    unsigned run_time = 0;
-    unsigned convergence_time = 0;
+    int runtime = 0;
+    int convergence_time = 0;
 
-    QTime time;
-    time.start();
-
-    while( run_time < max_run_time)
+    while( runtime < max_runtime)
     {
-        time.restart();
-        ConsDes consdes(_d, neh.get_result(), _factory);
+        ConsDes consdes(_d, neh.get_result(), _factory, _sf);
         consdes.run();
-        consdes.get_result();
+        Jobs pi = consdes.get_result();
+        unsigned cost = consdes.get_cost();
+        if(_ls)
+        {
+            LSRandom ls(pi, _factory, _sf);
+            ls.run();
+            pi   = ls.get_result();
+            cost = ls.get_cost();
+        }
         bool accept = false;
-        if(consdes.get_cost() < pi_best_cost)
+        if(cost < pi_best_cost)
         {
             non_improve_count = 0;
-            pi_best = consdes.get_result();
-            pi_best_cost = consdes.get_cost();
+            pi_best = pi;
+            pi_best_cost = cost;
             accept = true;
         }
         else
         {
             ++non_improve_count;
-            if(_is_accept(consdes.get_cost(), pi_best_cost, t))
+            if(_is_accept(cost, pi_best_cost, t))
             {
-                pi_best = consdes.get_result();
-                pi_best_cost = consdes.get_cost();
+                pi_best = pi;
+                pi_best_cost = cost;
             }
         }
         ++_count;
@@ -63,21 +82,22 @@ void IG::run()
         {
             t = _alpha * t;
         }
-        run_time += time.elapsed();
+        runtime += time.restart();
         if(accept)
         {
-            convergence_time = run_time;
+            convergence_time = runtime;
         }
     }
+    _factory.add_jobs(pi_best);
+    runtime += time.restart();
+
     printf("summary\n");
     printf("  count             : %u\n", _count);
     printf("  non-improve count : %u\n", non_improve_count);
-    printf("  run time          : %u\n", run_time);
-    printf("  convergence time  : %u\n", convergence_time);
-    printf("  max run time      : %u\n", max_run_time);
+    printf("  run time          : %d ms\n", runtime);
+    printf("  convergence time  : %d ms\n", convergence_time);
+    printf("  max run time      : %d ms\n", max_runtime);
     printf("\n");
-
-    _factory.add_jobs(pi_best);
 }
 
 bool IG::_is_accept(unsigned pi_purown, unsigned pi_new, unsigned t) const

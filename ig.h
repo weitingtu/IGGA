@@ -6,7 +6,12 @@
 class IG : public Scheduler
 {
 public:
-    IG(const Jobs& jobs, const Factory& factory, unsigned d, unsigned t0, double alpha, unsigned gamma);
+    IG(const Jobs& jobs, const Factory& factory, const SeqFactory& sf,
+       unsigned d, unsigned t,
+       unsigned t0, double alpha, unsigned gamma);
+    IG(const Jobs& jobs, const Factory& factory, const SeqFactory& sf,
+       unsigned d, unsigned t,
+       unsigned t0, double alpha, unsigned gamma, bool ls);
 
     virtual void run();
 private:
@@ -17,6 +22,7 @@ private:
     const unsigned _t0;
     const double   _alpha;
     const unsigned _gamma;
+    bool  _ls;
 };
 
 #endif // IG_H

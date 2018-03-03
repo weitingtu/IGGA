@@ -6,7 +6,7 @@
 class LS : public Scheduler
 {
 public:
-    LS(const Jobs& jobs, const Factory& factory);
+    LS(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 };

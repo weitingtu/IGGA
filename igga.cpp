@@ -16,7 +16,7 @@
 
 class Init {
 public:
-    void init(const Jobs& jobs, const Factory& factory);
+    void init(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
     void get_best(Jobs &best, unsigned &best_cost) const;       // 取得佳解及其目標函數
     void select(Jobs& pi_incumbent, std::vector<Jobs>& others); // 進入解構前所選擇之排序
 
@@ -27,23 +27,29 @@ private:
 };
 
 // 定義data
-void Init::init(const Jobs &jobs, const Factory &factory)
+void Init::init(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
 {
     _job_sets.clear();
     _costs.clear();
 
     // 分別執行四種演算法以得到四個排序
-    PH1 ph1(jobs, factory);
+    QTime t;
+    t.start();
+    PH1 ph1(jobs, factory, sf);
     ph1.run();
+    printf("ph1 %u\n", t.restart());
 
-    FNM fnm(jobs, factory);
+    FNM fnm(jobs, factory, sf);
     fnm.run();
+    printf("fnm %u\n", t.restart());
 
-    LS ls(jobs, factory);
+    LS ls(jobs, factory, sf);
     ls.run();
+    printf("ls  %u\n", t.restart());
 
-    CFI cfi(jobs, factory);
+    CFI cfi(jobs, factory, sf);
     cfi.run();
+    printf("cfi %u\n", t.elapsed());
 
     // 將所得排序存起來
     _job_sets.push_back(ph1.get_result());
@@ -148,8 +154,8 @@ void Init::select(Jobs& pi_incumbent, std::vector<Jobs>& others)
     }
 }
 
-IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp, unsigned t)
-    : Scheduler(jobs, factory),
+IGGA::IGGA(const Jobs &jobs, const Factory &factory, const SeqFactory &sf, unsigned d, double jp, unsigned t)
+    : Scheduler(jobs, factory, sf),
       _d(d),    // 解構所抽出之工件數
       _jp(jp),  // 跳躍機率設定
       _t(t),
@@ -159,10 +165,10 @@ IGGA::IGGA(const Jobs &jobs, const Factory &factory, unsigned d, double jp, unsi
 {
 }
 
-IGGA::IGGA(const Jobs &jobs, const Factory &factory,
+IGGA::IGGA(const Jobs &jobs, const Factory &factory, const SeqFactory &sf,
            unsigned d, double jp, unsigned t,
            unsigned t0, unsigned alpha, unsigned gamma)
-    : Scheduler(jobs, factory),
+    : Scheduler(jobs, factory, sf),
       _d(d),    // 解構所抽出之工件數
       _jp(jp),  // 跳躍機率設定
       _t(t),
@@ -221,31 +227,27 @@ std::vector<Jobs> IGGA::_crossvoer(const Jobs& pi_new, const std::vector<Jobs>& 
 
 void IGGA::run()
 {
-    SeqFactory sf;
-    sf.init(_jobs);
+    QTime time;
+    time.start();
 
     Init init;
-    init.init(_jobs, _factory);
+    init.init(_jobs, _factory, _sf);
     Jobs pi_best;
     unsigned pi_best_cost;
     init.get_best(pi_best, pi_best_cost);
 
     // 終止條件設定
-    const unsigned max_run_time = _jobs.size() * _factory.get_machine_size() / 2 * _t;
+    const int max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
     unsigned non_improve_count = 0;
     unsigned t = _t0;
 
-    unsigned run_time = 0;
-    unsigned convergence_time = 0;
+    int runtime = 0;
+    int convergence_time = 0;
 
-    QTime time;
-    time.start();
-
-    while( run_time < max_run_time)
+    while( runtime < max_runtime)
     {
-        time.restart();
         io_debug("Iteration %u (non-improve %u) pi best %u\n",
                  (unsigned)_count, (unsigned)non_improve_count, pi_best_cost);
         Jobs pi_incumbent;
@@ -253,24 +255,24 @@ void IGGA::run()
         init.select(pi_incumbent, others);
 
         // Construct/Destruct
-        ConsDes consdes(_d, pi_incumbent, _factory);
+        ConsDes consdes(_d, pi_incumbent, _factory, _sf);
         consdes.run();
 
         Jobs pi_new = consdes.get_result();
         unsigned pi_new_cost = consdes.get_cost();
-        io_debug("Cons/Des %u -> %u\n", sf.tct(pi_incumbent), pi_new_cost);
+        io_debug("Cons/Des %u -> %u\n", _sf.tct(pi_incumbent), pi_new_cost);
 
         // Local search
         double rf = (double) rand() / (RAND_MAX + 1.0 );
         Scheduler* s = nullptr;
         if(rf < _jp)
         {
-            s = new CDJS(pi_new, _factory);
+            s = new CDJS(pi_new, _factory, _sf);
             io_debug("Rf %.2f < %.2f, select CDJS ", rf, _jp);
         }
         else
         {
-            s = new RIS(pi_new, pi_best, _factory);
+            s = new RIS(pi_new, pi_best, _factory, _sf);
             io_debug("Rf %.2f >= %.2f, select RIS ", rf, _jp);
         }
 
@@ -293,7 +295,7 @@ void IGGA::run()
             io_debug("crossover ");
             for(size_t i = 0; i < r.size(); ++i)
             {
-                io_debug("(%u) %u ", (unsigned)i, sf.tct(r.at(i)));
+                io_debug("(%u) %u ", (unsigned)i, _sf.tct(r.at(i)));
             }
             io_debug("\n");
 
@@ -347,21 +349,23 @@ void IGGA::run()
         {
             t = _alpha * t;
         }
-        run_time += time.elapsed();
+        runtime +=time.restart();
         if(accept)
         {
-            convergence_time = run_time;
+            convergence_time = runtime;
         }
     }
+
+    _factory.add_jobs(pi_best);
+    runtime +=time.restart();
+
     printf("summary\n");
     printf("  count             : %u\n", _count);
     printf("  non-improve count : %u\n", non_improve_count);
-    printf("  run time          : %u\n", run_time);
-    printf("  convergence time  : %u\n", convergence_time);
-    printf("  max run time      : %u\n", max_run_time);
+    printf("  run time          : %d ms\n", runtime);
+    printf("  convergence time  : %d ms\n", convergence_time);
+    printf("  max run time      : %d ms\n", max_runtime);
     printf("\n");
-
-    _factory.add_jobs(pi_best);
 }
 
 // 降溫機制

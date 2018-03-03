@@ -5,6 +5,7 @@
 #include "ph1.h"
 #include "fnm.h"
 #include "ls.h"
+#include "ls_random.h"
 #include "cfi.h"
 #include "cdjs.h"
 #include "ris.h"
@@ -54,9 +55,11 @@ MainWindow::MainWindow(QWidget *parent)
       _igga_act(nullptr),
       _igga_sa_act(nullptr),
       _ig_act(nullptr),
+      _ig_ls_act(nullptr),
       _cfi_act(nullptr),
       _consdef_act(nullptr),
       _ls_act(nullptr),
+      _ls_random_act(nullptr),
       _ph1_act(nullptr),
       _neh_act(nullptr),
       _cdjs_act(nullptr),
@@ -101,12 +104,16 @@ void MainWindow::_create_actions()
     connect(_igga_sa_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _ig_act = new QAction(tr("IG"), this);
     connect(_ig_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ig_ls_act = new QAction(tr("IG-LS"), this);
+    connect(_ig_ls_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _cfi_act = new QAction(tr("CFI"), this);
     connect(_cfi_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _consdef_act= new QAction(tr("Construct Destruct"), this);
     connect(_consdef_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _ls_act= new QAction(tr("LS"), this);
     connect(_ls_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
+    _ls_random_act= new QAction(tr("LS-Random"), this);
+    connect(_ls_random_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _ph1_act= new QAction(tr("PH1"), this);
     connect(_ph1_act, SIGNAL(triggered(bool)), this, SLOT(_run()));
     _neh_act= new QAction(tr("NEH"), this);
@@ -132,9 +139,11 @@ void MainWindow::_create_menus()
     _run_menu->addAction(_igga_act);
     _run_menu->addAction(_igga_sa_act);
     _run_menu->addAction(_ig_act);
+    _run_menu->addAction(_ig_ls_act);
     _run_menu->addAction(_cfi_act);
     _run_menu->addAction(_consdef_act);
     _run_menu->addAction(_ls_act);
+    _run_menu->addAction(_ls_random_act);
     _run_menu->addAction(_ph1_act);
     _run_menu->addAction(_neh_act);
     _run_menu->addAction(_cdjs_act);
@@ -227,54 +236,67 @@ void MainWindow::_run() const
     {
         Scheduler* scheduler = nullptr;
 
+        SeqFactory sf;
+        sf.init(_r.get_jobs(i));
+
         if(s == _igga_act)
         {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
                                  _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
         }
         else if(s == _igga_sa_act)
         {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i),
+            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
                                  _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
                                  _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
         }
         else if(s == _ig_act)
         {
-            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i),
-                               _d_spinbox->value(),
+            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i), sf,
+                               _d_spinbox->value(), _t_spinbox->value(),
                                _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
+        }
+        else if(s == _ig_ls_act)
+        {
+            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i), sf,
+                               _d_spinbox->value(), _t_spinbox->value(),
+                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value(), true);
         }
         else if(s == _cfi_act)
         {
-            scheduler = new CFI(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new CFI(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _consdef_act)
         {
-            scheduler = new ConsDes(_d_spinbox->value(), _r.get_jobs(i), _r.get_factory(i));
+            scheduler = new ConsDes(_d_spinbox->value(), _r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _ls_act)
         {
-            scheduler = new LS(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new LS(_r.get_jobs(i), _r.get_factory(i), sf);
+        }
+        else if(s == _ls_random_act)
+        {
+            scheduler = new LSRandom(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _ph1_act)
         {
-            scheduler = new PH1(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new PH1(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _neh_act)
         {
-            scheduler = new NEH(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new NEH(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _cdjs_act)
         {
-            scheduler = new CDJS(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new CDJS(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _fnm_act)
         {
-            scheduler = new FNM(_r.get_jobs(i), _r.get_factory(i));
+            scheduler = new FNM(_r.get_jobs(i), _r.get_factory(i), sf);
         }
         else if(s == _ris_act)
         {
-            scheduler = new RIS(_r.get_jobs(i), _r.get_jobs(i), _r.get_factory(i));
+            scheduler = new RIS(_r.get_jobs(i), _r.get_jobs(i), _r.get_factory(i), sf);
         }
 
         if(nullptr == scheduler)

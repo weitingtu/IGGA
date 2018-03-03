@@ -37,9 +37,11 @@ private:
     QAction* _igga_act;
     QAction* _igga_sa_act;
     QAction* _ig_act;
+    QAction* _ig_ls_act;
     QAction* _cfi_act;
     QAction* _consdef_act;
     QAction* _ls_act;
+    QAction* _ls_random_act;
     QAction* _ph1_act;
     QAction* _neh_act;
     QAction* _cdjs_act;

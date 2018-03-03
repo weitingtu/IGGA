@@ -4,8 +4,8 @@
 #include <QtGlobal>
 #include "ioApi.h"
 
-CFI::CFI(const Jobs &jobs, const Factory &factory)
-    : Scheduler(jobs, factory)
+CFI::CFI(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
+    : Scheduler(jobs, factory, sf)
 {
 }
 
@@ -55,11 +55,6 @@ unsigned CFI::_get_idle_time(const Job& j1, const Job& j2) const
     for(size_t i = 0; i < j1.machine_times.size(); ++i)
     {
         diff += j2.machine_times.at(i) - j2.processing_times.at(i) - j1.machine_times.at(i);
-//        printf("%u - %u - %u = %u\n",
-//                    j2.machine_times.at(i),
-//                    j2.processing_times.at(i),
-//                    j1.machine_times.at(i),
-//                    j2.machine_times.at(i) - j2.processing_times.at(i) - j1.machine_times.at(i));
     }
 
     return diff;
@@ -83,7 +78,6 @@ unsigned CFI::_get_index_function_value(const Jobs& pi, unsigned job_id)
     s.push_back(_create_artificial_job(job_set));
 
     _factory.add_jobs(s);
-//    _factory.print();
 
     unsigned ci = pi.empty() ? _get_idle_time( _factory.get_jobs().at(pi.size()) )
                              : _get_idle_time( _factory.get_jobs().at(pi.size() - 1), _factory.get_jobs().at(pi.size()));
@@ -129,19 +123,17 @@ Jobs CFI::_isa()
     }
 
     _factory.add_jobs(pi);
-//    _factory.print();
     return pi;
 }
 
 Jobs CFI::_neh(Jobs pi)
 {
     _factory.add_jobs(pi);
-//    _factory.print();
 
     Jobs best = pi;
     unsigned min_cost = _factory.get_cost();
 
-    NEH neh(pi, _factory);
+    NEH neh(pi, _factory, _sf);
 
     unsigned r = 1;
     while(r <= 6)
@@ -165,5 +157,4 @@ void CFI::run()
     Jobs pi = _isa();
     pi = _neh(pi);
     _factory.add_jobs(pi);
-//    _factory.print();
 }

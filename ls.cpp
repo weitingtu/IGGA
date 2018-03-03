@@ -58,8 +58,8 @@ class Machine
 
 using Machines = std::vector<Machine>;
 
-LS::LS(const Jobs &jobs, const Factory& factory)
-    : Scheduler(jobs, factory)
+LS::LS(const Jobs &jobs, const Factory& factory, const SeqFactory &sf)
+    : Scheduler(jobs, factory, sf)
 {
 
 }

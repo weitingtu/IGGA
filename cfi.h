@@ -7,7 +7,7 @@
 class CFI : public Scheduler
 {
 public:
-    CFI(const Jobs& jobs, const Factory& factory);
+    CFI(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 

@@ -3,8 +3,8 @@
 #include <QtGlobal>
 #include "list"
 
-RIS::RIS(const Jobs &jobs, const Jobs &pi_best, const Factory &factory)
-    : Scheduler(jobs, factory),
+RIS::RIS(const Jobs &jobs, const Jobs &pi_best, const Factory &factory, const SeqFactory&sf)
+    : Scheduler(jobs, factory, sf),
     _pi_best(pi_best)
 {
 }

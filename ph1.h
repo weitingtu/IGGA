@@ -6,7 +6,7 @@
 class PH1 : public Scheduler
 {
 public:
-    PH1(const Jobs& jobs, const Factory& factory);
+    PH1(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 private:

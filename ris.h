@@ -6,7 +6,7 @@
 class RIS : public Scheduler
 {
 public:
-    RIS(const Jobs& jobs, const Jobs& pi_best, const Factory& factory);
+    RIS(const Jobs& jobs, const Jobs& pi_best, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
     void run2();

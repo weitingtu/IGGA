@@ -6,7 +6,7 @@
 class FNM : public Scheduler
 {
 public:
-    FNM(const Jobs& jobs, const Factory& factory);
+    FNM(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
 
     virtual void run();
 

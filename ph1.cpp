@@ -3,8 +3,8 @@
 #include <algorithm>
 #include <set>
 
-PH1::PH1(const Jobs& jobs, const Factory& factory):
-    Scheduler(jobs, factory),
+PH1::PH1(const Jobs& jobs, const Factory& factory, const SeqFactory &sf):
+    Scheduler(jobs, factory, sf),
     _r_max(1)
 {
 }
@@ -60,7 +60,7 @@ Jobs PH1::_neh(Jobs pi)
     Jobs best = pi;
     unsigned min_cost = _factory.get_cost();
 
-    NEH neh(pi, _factory);
+    NEH neh(pi, _factory, _sf);
 
     unsigned r = 1;
     while(r <= _r_max)

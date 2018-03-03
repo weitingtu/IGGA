@@ -21,8 +21,8 @@ struct JobSeq
     unsigned count;
 };
 
-FNM::FNM(const Jobs &jobs, const Factory &factory)
-    : Scheduler(jobs, factory)
+FNM::FNM(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
+    : Scheduler(jobs, factory, sf)
 {
 }
 
@@ -78,7 +78,7 @@ Jobs FNM::_init()
 
 Jobs FNM::_neh(Jobs pi)
 {
-    NEH neh(pi, _factory);
+    NEH neh(pi, _factory, _sf);
 
     pi = neh.run( pi );
 

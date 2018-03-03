@@ -2,8 +2,8 @@
 #include "possibility.h"
 #include <set>
 
-ConsDes::ConsDes(unsigned d, const Jobs& jobs, const Factory& factory)
-    : Scheduler(jobs, factory), _d(d)
+ConsDes::ConsDes(unsigned d, const Jobs& jobs, const Factory& factory, const SeqFactory &sf)
+    : Scheduler(jobs, factory, sf), _d(d)
 {
 }
 

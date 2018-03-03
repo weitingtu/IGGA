@@ -1,5 +1,6 @@
 #include "job.h"
 #include <stdio.h>
+#include "factory.h"
 
 Job::Job():
     id(0),
@@ -37,4 +38,23 @@ void print_jobs(const Jobs& jobs)
         }
         printf("\n");
     }
+}
+
+void print_jobs(const Jobs& jobs, const SeqFactory& sf)
+{
+    for(const Job& job : jobs)
+    {
+        printf("Job %u ", job.id);
+        for(auto i : job.machine_times)
+        {
+            printf("%u ", i);
+        }
+        printf("\n");
+    }
+    printf("cost %u\n", sf.tct(jobs));
+}
+
+void print_jobs(const JobsSeq& jobs, const SeqFactory& sf)
+{
+    print_jobs(Jobs(jobs.begin(), jobs.end()), sf);
 }
