@@ -66,7 +66,7 @@ void RIS::run()
         Q_ASSERT(pi_new.size() == _pi_best.size() - 1);
 
         bool find = false;
-        for(size_t pos = 0; pos < pi_new.size(); ++pos)
+        for(size_t pos = 0; pos <= pi_new.size(); ++pos)
         {
             auto ite = pi_new.begin();
             std::advance(ite, pos);
@@ -94,4 +94,5 @@ void RIS::run()
         pi_new.insert(ite, insert_job);
     }
     _factory.add_jobs(pi_purown);
+    _result_jobs = pi_purown;
 }

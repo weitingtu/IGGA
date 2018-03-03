@@ -21,7 +21,6 @@ Jobs PH1::_isa()
     Jobs pi2(1, *(pi1.begin()));
     pi1.erase(pi1.begin());
     _factory.add_jobs(pi2);
-//    _factory.print();
 
     while(!pi1.empty())
     {
@@ -44,10 +43,8 @@ Jobs PH1::_isa()
         pi1.erase(min_ite);
         pi2 = best;
         _factory.add_jobs(pi2);
-//        _factory.print();
     }
     _factory.add_jobs(pi2);
-//    _factory.print();
 
     return pi2;
 }
@@ -55,7 +52,6 @@ Jobs PH1::_isa()
 Jobs PH1::_neh(Jobs pi)
 {
     _factory.add_jobs(pi);
-//    _factory.print();
 
     Jobs best = pi;
     unsigned min_cost = _factory.get_cost();
@@ -104,5 +100,5 @@ void PH1::run()
     pi = _neh(pi);
     pi = _pair_wise_exchange(pi);
     _factory.add_jobs(pi);
-//    _factory.print();
+    _result_jobs = pi;
 }

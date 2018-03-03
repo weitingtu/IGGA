@@ -357,6 +357,7 @@ void IGGA::run()
     }
 
     _factory.add_jobs(pi_best);
+    _result_jobs = pi_best;
     runtime +=time.restart();
 
     printf("summary\n");

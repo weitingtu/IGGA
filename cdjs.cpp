@@ -28,5 +28,5 @@ void CDJS::run()
         }
     }
     _factory.add_jobs(best);
-//    _factory.print();
+    _result_jobs = best;
 }

@@ -12,7 +12,9 @@ void NEH::run()
     Jobs pi1 = _jobs;
     std::sort(pi1.begin(), pi1.end(), greater());
 
-    run(pi1);
+    Jobs pi = run(pi1);
+    _factory.add_jobs(pi);
+    _result_jobs = pi;
 }
 
 Jobs NEH::run(const Jobs& pi1)
@@ -44,9 +46,5 @@ Jobs NEH::run(const Jobs& pi1)
         }
         pi2 = best;
     }
-    _factory.add_jobs(pi2);
-//    _factory.print();
-
-//    return pi2;
     return _factory.get_jobs();
 }

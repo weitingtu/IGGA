@@ -34,7 +34,9 @@ void ConsDes::run()
         }
     }
 
-    _run(pi1, pi2);
+    Jobs pi = _run(pi1, pi2);
+    _factory.add_jobs(pi);
+    _result_jobs = pi;
 }
 
 Jobs ConsDes::_run(Jobs pi1, Jobs pi2)
@@ -65,8 +67,6 @@ Jobs ConsDes::_run(Jobs pi1, Jobs pi2)
         }
         pi2 = best;
     }
-    _factory.add_jobs(pi2);
-//    _factory.print();
 
     return pi2;
 }

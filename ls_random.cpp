@@ -25,15 +25,18 @@ void LSRandom::run()
         Job job = *ite;
         pi.erase(ite);
 
-        for(size_t j = 0; j <= pi.size(); ++j)
+        for(size_t pos = 0; pos <= pi.size(); ++pos)
         {
             ite = pi.begin();
-            std::advance(ite, j);
+            std::advance(ite, pos);
             ite = pi.insert(ite, job);
+
             unsigned cost = _sf.seq_tct(pi);
+
             if(cost < init_cost)
             {
                 _factory.add_jobs(Jobs(pi.begin(), pi.end()));
+                _result_jobs = Jobs(pi.begin(), pi.end());
                 return;
             }
             pi.erase(ite);
@@ -45,4 +48,5 @@ void LSRandom::run()
     }
 
     _factory.add_jobs(_jobs);
+    _result_jobs = _jobs;
 }

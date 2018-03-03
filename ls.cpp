@@ -61,7 +61,6 @@ using Machines = std::vector<Machine>;
 LS::LS(const Jobs &jobs, const Factory& factory, const SeqFactory &sf)
     : Scheduler(jobs, factory, sf)
 {
-
 }
 
 void LS::run()
@@ -129,7 +128,6 @@ void LS::run()
             pi.push_back(_jobs.at(machine_jobs.at(i).id));
         }
         _factory.add_jobs(pi);
-//        _factory.print();
         unsigned cost = _factory.get_cost();
         if(cost < min_cost)
         {
@@ -138,5 +136,5 @@ void LS::run()
         }
     }
     _factory.add_jobs(best);
-//    _factory.print();
+    _result_jobs = best;
 }

@@ -31,7 +31,7 @@ void FNM::run()
     Jobs pi = _init();
     pi = _neh(pi);
     _factory.add_jobs(pi);
-//    _factory.print();
+    _result_jobs = pi;
 }
 
 Jobs FNM::_init()
@@ -70,8 +70,6 @@ Jobs FNM::_init()
     {
         pi.push_back(_jobs.at(job_seqs.at(i).id));
     }
-//    _factory.add_jobs(pi);
-//    _factory.print();
 
     return pi;
 }

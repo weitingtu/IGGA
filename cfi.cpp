@@ -122,16 +122,13 @@ Jobs CFI::_isa()
         pi.push_back(_jobs.at(i));
     }
 
-    _factory.add_jobs(pi);
     return pi;
 }
 
 Jobs CFI::_neh(Jobs pi)
 {
-    _factory.add_jobs(pi);
-
     Jobs best = pi;
-    unsigned min_cost = _factory.get_cost();
+    unsigned min_cost = _sf.tct(best);
 
     NEH neh(pi, _factory, _sf);
 
@@ -140,8 +137,7 @@ Jobs CFI::_neh(Jobs pi)
     {
        ++r;
        pi = neh.run( pi );
-       _factory.add_jobs( pi );
-       unsigned cost = _factory.get_cost();
+       unsigned cost = _sf.tct(pi);
        if(cost < min_cost)
        {
            min_cost = cost;
@@ -157,4 +153,5 @@ void CFI::run()
     Jobs pi = _isa();
     pi = _neh(pi);
     _factory.add_jobs(pi);
+    _result_jobs = pi;
 }
