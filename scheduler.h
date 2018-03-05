@@ -17,6 +17,11 @@ public:
     const Jobs& get_result_jobs() const { return _result_jobs; }
     unsigned get_result_cost() const { return _sf.tct(_result_jobs); }
     unsigned get_count() const { return _count; }
+    unsigned get_non_improve_count() const { return _non_improve_count; }
+    unsigned get_convergence_count() const { return _convergence_count; }
+    int get_runtime() const { return _runtime; }
+    int get_convergence_time() const { return _convergence_time; }
+    int get_max_runtime() const { return _max_runtime; }
 
 protected:
     Jobs       _jobs;
@@ -24,6 +29,11 @@ protected:
     SeqFactory _sf;
     Jobs       _result_jobs;
     unsigned   _count;
+    unsigned   _non_improve_count;
+    unsigned   _convergence_count;
+    int        _runtime;
+    int        _convergence_time;
+    int        _max_runtime;
 };
 
 #endif // SCHEDULER_H

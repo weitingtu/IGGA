@@ -27,7 +27,8 @@ void Writer::_write(FILE* fp,
                     const std::string& file_name,
                     int time,
                     unsigned iteration,
-                    const Jobs& jobs
+                    const Jobs& jobs,
+                    const JobInfo& job_info
                     ) const
 {
     if(jobs.empty())
@@ -60,6 +61,12 @@ void Writer::_write(FILE* fp,
     fprintf(fp, "Sum F, %u\n",      sum_f);
     fprintf(fp, "Time used, %d\n",  time);
     fprintf(fp, "Iterations, %u\n", iteration);
+    fprintf(fp, "Run Time used, %d\n",     job_info.runtime);
+    fprintf(fp, "Convergence Time, %d\n",  job_info.convergence_time);
+    fprintf(fp, "Max run Time, %d\n",      job_info.max_runtime);
+    fprintf(fp, "Count used, %d\n",        job_info.count);
+    fprintf(fp, "Non-improve Count, %d\n", job_info.non_improve_count);
+    fprintf(fp, "Convergence Count, %d\n", job_info.convergence_count);
     fprintf(fp, "Seq, Job-No, Complete Time (F)\n");
     for(size_t i = 0; i < jobs.size(); ++i)
     {
@@ -72,7 +79,8 @@ void Writer::_write(FILE* fp,
 void Writer::write(const std::string& in_name,
                    const std::vector<int>& times,
                    const std::vector<unsigned>& iterations,
-                   const std::vector<Jobs>& job_sets
+                   const std::vector<Jobs>& job_sets,
+                   const std::vector<JobInfo>& job_infos
                    ) const
 {
     if(in_name.empty())
@@ -99,7 +107,7 @@ void Writer::write(const std::string& in_name,
 
     for(size_t i = 0; i < job_sets.size(); ++i)
     {
-        _write(fp, in_name, times.at(i), iterations.at(i), job_sets.at(i));
+        _write(fp, in_name, times.at(i), iterations.at(i), job_sets.at(i), job_infos.at(i));
     }
 
     fclose(fp);

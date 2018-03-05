@@ -231,6 +231,7 @@ void MainWindow::_run() const
     std::vector<Jobs>     job_sets;
     std::vector<int>      times;
     std::vector<unsigned> iterations;
+    std::vector<JobInfo>  job_infos;
 
     for(size_t i = 0; i < _r.size();++i)
     {
@@ -314,6 +315,14 @@ void MainWindow::_run() const
 
         job_sets.push_back(scheduler->get_result());
         iterations.push_back(scheduler->get_count());
+        job_infos.push_back(
+        {scheduler->get_count(),
+         scheduler->get_non_improve_count(),
+         scheduler->get_convergence_count(),
+         scheduler->get_runtime(),
+         scheduler->get_convergence_time(),
+         scheduler->get_max_runtime()
+                    });
         delete scheduler;
         scheduler = nullptr;
     }
@@ -322,7 +331,7 @@ void MainWindow::_run() const
     QFileInfo file_info(QString(_r.get_file_name().c_str()));
 
     Writer w;
-    w.write( file_info.fileName().toLatin1().data(), times, iterations, job_sets );
+    w.write( file_info.fileName().toLatin1().data(), times, iterations, job_sets, job_infos );
 }
 
 void MainWindow::_test_cost_function() const

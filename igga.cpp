@@ -237,19 +237,20 @@ void IGGA::run()
     init.get_best(pi_best, pi_best_cost);
 
     // 終止條件設定
-    const int max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
+    _max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
-    unsigned non_improve_count = 0;
+    _non_improve_count = 0;
+    _convergence_count = 0;
     unsigned t = _t0;
 
-    int runtime = 0;
-    int convergence_time = 0;
+    _runtime = 0;
+    _convergence_time = 0;
 
-    while( runtime < max_runtime)
+    while( _runtime < _max_runtime)
     {
         io_debug("Iteration %u (non-improve %u) pi best %u\n",
-                 (unsigned)_count, (unsigned)non_improve_count, pi_best_cost);
+                 (unsigned)_count, (unsigned)_non_improve_count, pi_best_cost);
         Jobs pi_incumbent;
         std::vector<Jobs> others;
         init.select(pi_incumbent, others);
@@ -304,7 +305,7 @@ void IGGA::run()
                 io_debug("Accept better pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
                 pi_best = pi_purown;
                 pi_best_cost = pi_purown_cost;
-                non_improve_count = 0;
+                _non_improve_count = 0;
                 accept = true;
             }
 
@@ -317,21 +318,21 @@ void IGGA::run()
                     io_debug("Accept %u crossover cost %u -> %u\n", (unsigned)i, pi_best_cost, cost);
                     pi_best = r.at(i);
                     pi_best_cost = cost;
-                    non_improve_count = 0;
+                    _non_improve_count = 0;
                     accept = true;
                 }
             }
 
             if(!accept)
             {
-                ++non_improve_count;
+                ++_non_improve_count;
                 io_debug("Don't accept pi' and corssvoer pi'\n");
             }
         }
         else
         {
             // Try to Accept
-            ++non_improve_count;
+            ++_non_improve_count;
             if(((0 == _gamma) && _is_accept(pi_purown_cost, pi_new_cost))
                     || ((0 != _gamma) && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
             {
@@ -349,23 +350,25 @@ void IGGA::run()
         {
             t = _alpha * t;
         }
-        runtime +=time.restart();
+        _runtime +=time.restart();
         if(accept)
         {
-            convergence_time = runtime;
+            _convergence_time = _runtime;
+            _convergence_count = _count;
         }
     }
 
     _factory.add_jobs(pi_best);
     _result_jobs = pi_best;
-    runtime +=time.restart();
+    _runtime +=time.restart();
 
     printf("summary\n");
     printf("  count             : %u\n", _count);
-    printf("  non-improve count : %u\n", non_improve_count);
-    printf("  run time          : %d ms\n", runtime);
-    printf("  convergence time  : %d ms\n", convergence_time);
-    printf("  max run time      : %d ms\n", max_runtime);
+    printf("  non-improve count : %u\n", _non_improve_count);
+    printf("  convergence count : %u\n", _convergence_count);
+    printf("  run time          : %d ms\n", _runtime);
+    printf("  convergence time  : %d ms\n", _convergence_time);
+    printf("  max run time      : %d ms\n", _max_runtime);
     printf("\n");
 }
 
