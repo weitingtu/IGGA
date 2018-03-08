@@ -38,16 +38,17 @@ void IG::run()
     Jobs pi_best          = neh.get_result();
     unsigned pi_best_cost = neh.get_cost();
 
-    const int max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
+    _max_runtime = _jobs.size() * _factory.get_machine_size() / 2 * _t;
 
     _count = 0;
-    unsigned non_improve_count = 0;
+    _non_improve_count = 0;
+    _convergence_count = 0;
     unsigned t = _t0;
 
-    int runtime = 0;
-    int convergence_time = 0;
+    _runtime = 0;
+    _convergence_time = 0;
 
-    while( runtime < max_runtime)
+    while( _runtime < _max_runtime)
     {
         ConsDes consdes(_d, neh.get_result(), _factory, _sf);
         consdes.run();
@@ -63,14 +64,14 @@ void IG::run()
         bool accept = false;
         if(cost < pi_best_cost)
         {
-            non_improve_count = 0;
+            _non_improve_count = 0;
             pi_best = pi;
             pi_best_cost = cost;
             accept = true;
         }
         else
         {
-            ++non_improve_count;
+            ++_non_improve_count;
             if(_is_accept(cost, pi_best_cost, t))
             {
                 pi_best = pi;
@@ -82,22 +83,24 @@ void IG::run()
         {
             t = _alpha * t;
         }
-        runtime += time.restart();
+        _runtime += time.restart();
         if(accept)
         {
-            convergence_time = runtime;
+            _convergence_time = _runtime;
+            _convergence_count = _count;
         }
     }
     _factory.add_jobs(pi_best);
     _result_jobs = pi_best;
-    runtime += time.restart();
+    _runtime += time.restart();
 
     printf("summary\n");
     printf("  count             : %u\n", _count);
-    printf("  non-improve count : %u\n", non_improve_count);
-    printf("  run time          : %d ms\n", runtime);
-    printf("  convergence time  : %d ms\n", convergence_time);
-    printf("  max run time      : %d ms\n", max_runtime);
+    printf("  non-improve count : %u\n", _non_improve_count);
+    printf("  convergence count : %u\n", _convergence_count);
+    printf("  run time          : %d ms\n", _runtime);
+    printf("  convergence time  : %d ms\n", _convergence_time);
+    printf("  max run time      : %d ms\n", _max_runtime);
     printf("\n");
 }
 

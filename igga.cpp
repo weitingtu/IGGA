@@ -360,7 +360,7 @@ void IGGA::run()
 
     _factory.add_jobs(pi_best);
     _result_jobs = pi_best;
-    _runtime +=time.restart();
+    _runtime += time.restart();
 
     printf("summary\n");
     printf("  count             : %u\n", _count);
