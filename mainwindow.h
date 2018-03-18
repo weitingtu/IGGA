@@ -8,6 +8,9 @@ class QAction;
 class QMenu;
 class QSpinBox;
 class QDoubleSpinBox;
+class QGroupBox;
+class QRadioButton;
+class IGGA;
 
 class MainWindow : public QMainWindow
 {
@@ -30,6 +33,14 @@ private:
     void _create_menus();
     void _create_layout();
     void _test_cost_function() const;
+
+    QGroupBox* _create_initial_exclusive_group();
+    QGroupBox* _create_local_search_exclusive_group();
+    QGroupBox* _create_temporature_exclusive_group();
+
+    void _set_init_sol(IGGA* s) const;
+    void _set_local_search(IGGA* s) const;
+    void _set_temporiture(IGGA* s) const;
 
     QMenu*   _file_menu;
     QMenu*   _run_menu;
@@ -54,6 +65,15 @@ private:
     QSpinBox* _t0_spinbox;
     QDoubleSpinBox* _alpha_spinbox;
     QSpinBox* _gamma_spinbox;
+    QRadioButton* _init_mul;
+    QRadioButton* _init_neh;
+    QRadioButton* _ls_none;
+    QRadioButton* _ls_ls;
+    QRadioButton* _ls_cdjs;
+    QRadioButton* _ls_ris;
+    QRadioButton* _ls_cdjs_ris;
+    QRadioButton* _temp_sa;
+    QRadioButton* _temp_hatami;
     Reader _r;
 
 };

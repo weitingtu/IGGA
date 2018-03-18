@@ -25,6 +25,8 @@
 #include <QGridLayout>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QGroupBox>
+#include <QRadioButton>
 
 static Jobs _creat_test_jobs()
 {
@@ -72,6 +74,15 @@ MainWindow::MainWindow(QWidget *parent)
       _t0_spinbox(nullptr),
       _alpha_spinbox(nullptr),
       _gamma_spinbox(nullptr),
+      _init_mul(nullptr),
+      _init_neh(nullptr),
+      _ls_none(nullptr),
+      _ls_ls(nullptr),
+      _ls_cdjs(nullptr),
+      _ls_ris(nullptr),
+      _ls_cdjs_ris(nullptr),
+      _temp_sa(nullptr),
+      _temp_hatami(nullptr),
       _r()
 {
     _create_actions();
@@ -201,8 +212,71 @@ void MainWindow::_create_layout()
     layout->addWidget(_t0_spinbox, 3, 0);
     layout->addWidget(_alpha_spinbox, 4, 0);
     layout->addWidget(_gamma_spinbox, 5, 0);
-    layout->setRowStretch(6, 100);
+    layout->addWidget(_create_initial_exclusive_group(), 6, 0);
+    layout->addWidget(_create_local_search_exclusive_group(), 7, 0);
+    layout->addWidget(_create_temporature_exclusive_group(), 8, 0);
+    layout->setRowStretch(9, 100);
     layout->setColumnStretch(1, 100);
+}
+
+QGroupBox* MainWindow::_create_initial_exclusive_group()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Initial solution"));
+
+    _init_mul = new QRadioButton(tr("Ph1(P), FNM, LS, CFI"));
+    _init_neh = new QRadioButton(tr("NEH"));
+
+    _init_mul->setChecked(true);
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(_init_mul);
+    vbox->addWidget(_init_neh);
+    vbox->addStretch(1);
+    groupBox->setLayout(vbox);
+
+    return groupBox;
+}
+
+QGroupBox* MainWindow::_create_local_search_exclusive_group()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Local search"));
+
+    _ls_none     = new QRadioButton(tr("None"));
+    _ls_ls       = new QRadioButton(tr("LS"));
+    _ls_cdjs     = new QRadioButton(tr("CDJS"));
+    _ls_ris      = new QRadioButton(tr("RIS"));
+    _ls_cdjs_ris = new QRadioButton(tr("CDJS & RIS"));
+
+    _ls_cdjs_ris->setChecked(true);
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(_ls_none);
+    vbox->addWidget(_ls_ls);
+    vbox->addWidget(_ls_cdjs);
+    vbox->addWidget(_ls_ris);
+    vbox->addWidget(_ls_cdjs_ris);
+    vbox->addStretch(1);
+    groupBox->setLayout(vbox);
+
+    return groupBox;
+}
+
+QGroupBox* MainWindow::_create_temporature_exclusive_group()
+{
+    QGroupBox *groupBox = new QGroupBox(tr("Temporature"));
+
+    _temp_sa     = new QRadioButton(tr("SA"));
+    _temp_hatami = new QRadioButton(tr("Hatami"));
+
+    _temp_hatami->setChecked(true);
+
+    QVBoxLayout *vbox = new QVBoxLayout;
+    vbox->addWidget(_temp_sa);
+    vbox->addWidget(_temp_hatami);
+    vbox->addStretch(1);
+    groupBox->setLayout(vbox);
+
+    return groupBox;
 }
 
 void MainWindow::_open()
@@ -214,6 +288,66 @@ void MainWindow::_open()
     }
 
     _r.read(file_name.toLatin1().data());
+}
+
+void MainWindow::_set_init_sol(IGGA* s) const
+{
+    if(_init_mul->isChecked())
+    {
+        s->set_init_sol(IGGA::INIT_SOL::MULTIPLE);
+    }
+    else if(_init_neh->isChecked())
+    {
+        s->set_init_sol(IGGA::INIT_SOL::NEH);
+    }
+    else
+    {
+        Q_ASSERT(0);
+    }
+}
+
+void MainWindow::_set_local_search(IGGA* s) const
+{
+    if(_ls_none->isChecked())
+    {
+        s->set_local_search(IGGA::LOCAL_SEARCH::NONE);
+    }
+    else if(_ls_ls->isChecked())
+    {
+        s->set_local_search(IGGA::LOCAL_SEARCH::LS);
+    }
+    else if(_ls_cdjs->isChecked())
+    {
+        s->set_local_search(IGGA::LOCAL_SEARCH::CDJS);
+    }
+    else if(_ls_ris->isChecked())
+    {
+        s->set_local_search(IGGA::LOCAL_SEARCH::RIS);
+    }
+    else if(_ls_cdjs_ris->isChecked())
+    {
+        s->set_local_search(IGGA::LOCAL_SEARCH::CDJS_RIS);
+    }
+    else
+    {
+        Q_ASSERT(0);
+    }
+}
+
+void MainWindow::_set_temporiture(IGGA* s) const
+{
+    if(_temp_sa->isChecked())
+    {
+        s->set_temporature(IGGA::TEMPORATURE::SA);
+    }
+    else if(_temp_hatami->isChecked())
+    {
+        s->set_temporature(IGGA::TEMPORATURE::HATAMI);
+    }
+    else
+    {
+        Q_ASSERT(0);
+    }
 }
 
 void MainWindow::_run() const
@@ -244,6 +378,9 @@ void MainWindow::_run() const
         {
             scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
                                  _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
+            _set_init_sol(dynamic_cast<IGGA*>(scheduler));
+            _set_local_search(dynamic_cast<IGGA*>(scheduler));
+            _set_temporiture(dynamic_cast<IGGA*>(scheduler));
         }
         else if(s == _igga_sa_act)
         {

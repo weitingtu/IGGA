@@ -8,6 +8,9 @@
 #include "consdes.h"
 #include "ris.h"
 #include "cdjs.h"
+#include "neh.h"
+#include "ls_random.h"
+#include "ls_none.h"
 #include "ioApi.h"
 #include "possibility.h"
 #include <stdlib.h>
@@ -17,14 +20,39 @@
 class Init {
 public:
     void init(const Jobs& jobs, const Factory& factory, const SeqFactory& sf);
+    void init_neh(const Jobs &jobs, const Factory &factory, const SeqFactory &sf);
     void get_best(Jobs &best, unsigned &best_cost) const;       // 取得佳解及其目標函數
     void select(Jobs& pi_incumbent, std::vector<Jobs>& others); // 進入解構前所選擇之排序
 
 private:
+    void _calculate_probability();
+
     std::vector<Jobs>     _job_sets;
     std::vector<unsigned> _costs;
     std::vector<double>   _cp;
 };
+
+void Init::_calculate_probability()
+{
+    // 計算fitness值
+    std::vector<double> fits(_costs.size(), 0.0);
+
+    for(size_t i = 0; i < _costs.size();++i)
+    {
+        fits.at(i) = 1.0 / (double)_costs.at(i);
+    }
+
+    double total_fits = std::accumulate(fits.begin(), fits.end(), 0.0);
+
+    _cp.clear();
+    _cp.resize(fits.size(), 0.0);
+    _cp.at(0) = fits.at(0) / total_fits;
+    for(size_t i = 1;i < fits.size(); ++i)
+    {
+         // 機率計算
+        _cp.at(i) = _cp.at(i - 1) + fits.at(i) / total_fits;
+    }
+}
 
 // 定義data
 void Init::init(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
@@ -62,29 +90,32 @@ void Init::init(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
     _costs.push_back(ls.get_cost());
     _costs.push_back(cfi.get_cost());
 
-    // 計算fitness值
-    std::vector<double> fits(_costs.size(), 0.0);
-
-    for(size_t i = 0; i < _costs.size();++i)
-    {
-        fits.at(i) = 1.0 / (double)_costs.at(i);
-    }
-
-    double total_fits = std::accumulate(fits.begin(), fits.end(), 0.0);
-
-    _cp.clear();
-    _cp.resize(fits.size(), 0.0);
-    _cp.at(0) = fits.at(0) / total_fits;
-    for(size_t i = 1;i < fits.size(); ++i)
-    {
-         // 機率計算
-        _cp.at(i) = _cp.at(i - 1) + fits.at(i) / total_fits;
-    }
+    _calculate_probability();
 
     io_debug("ph1 cost %u %.2f - %.2f\n", ph1.get_cost(), 0.0, _cp.at(0));
     io_debug("fnm cost %u %.2f - %.2f\n", fnm.get_cost(), _cp.at(0), _cp.at(1));
     io_debug("ls  cost %u %.2f - %.2f\n", ls.get_cost(),  _cp.at(1), _cp.at(2));
     io_debug("cfi cost %u %.2f - %.2f\n", cfi.get_cost(), _cp.at(2), _cp.at(3));
+}
+
+void Init::init_neh(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
+{
+    _job_sets.clear();
+    _costs.clear();
+
+    QTime t;
+    t.start();
+
+    NEH neh(jobs, factory, sf);
+    Jobs pi = neh.run( jobs);
+    printf("ph1 %u\n", t.restart());
+
+    _job_sets.push_back(pi);
+    _costs.push_back(sf.tct(pi));
+
+    _calculate_probability();
+
+    io_debug("neh cost %u %.2f - %.2f\n", sf.tct(pi), 0.0, _cp.at(0));
 }
 
 void Init::get_best(Jobs& best, unsigned& best_cost) const
@@ -161,7 +192,10 @@ IGGA::IGGA(const Jobs &jobs, const Factory &factory, const SeqFactory &sf, unsig
       _t(t),
       _t0(0),
       _alpha(0),
-      _gamma(0)
+      _gamma(0),
+      _init_sol(INIT_SOL::MULTIPLE),
+      _local_search(LOCAL_SEARCH::CDJS_RIS),
+      _temporature(TEMPORATURE::HATAMI)
 {
 }
 
@@ -227,11 +261,24 @@ std::vector<Jobs> IGGA::_crossvoer(const Jobs& pi_new, const std::vector<Jobs>& 
 
 void IGGA::run()
 {
+    if((TEMPORATURE::SA == _temporature) && (0 == _gamma))
+    {
+        printf("error: run sa with %u gamma\n", _gamma);
+        return;
+    }
+
     QTime time;
     time.start();
 
     Init init;
-    init.init(_jobs, _factory, _sf);
+    if(INIT_SOL::MULTIPLE == _init_sol)
+    {
+        init.init(_jobs, _factory, _sf);
+    }
+    else
+    {
+        init.init(_jobs, _factory, _sf);
+    }
     Jobs pi_best;
     unsigned pi_best_cost;
     init.get_best(pi_best, pi_best_cost);
@@ -264,17 +311,40 @@ void IGGA::run()
         io_debug("Cons/Des %u -> %u\n", _sf.tct(pi_incumbent), pi_new_cost);
 
         // Local search
-        double rf = (double) rand() / (RAND_MAX + 1.0 );
         Scheduler* s = nullptr;
-        if(rf < _jp)
+        if(LOCAL_SEARCH::LS == _local_search)
+        {
+            s = new LSRandom(pi_new, _factory, _sf);
+        }
+        else if(LOCAL_SEARCH::CDJS == _local_search)
         {
             s = new CDJS(pi_new, _factory, _sf);
-            io_debug("Rf %.2f < %.2f, select CDJS ", rf, _jp);
+        }
+        else if(LOCAL_SEARCH::RIS == _local_search)
+        {
+            s = new RIS(pi_new, pi_best, _factory, _sf);
+        }
+        else if(LOCAL_SEARCH::CDJS_RIS == _local_search)
+        {
+            double rf = (double) rand() / (RAND_MAX + 1.0 );
+            if(rf < _jp)
+            {
+                s = new CDJS(pi_new, _factory, _sf);
+                io_debug("Rf %.2f < %.2f, select CDJS ", rf, _jp);
+            }
+            else
+            {
+                s = new RIS(pi_new, pi_best, _factory, _sf);
+                io_debug("Rf %.2f >= %.2f, select RIS ", rf, _jp);
+            }
+        }
+        else if(LOCAL_SEARCH::NONE == _local_search)
+        {
+            s = new LSNone(pi_new, _factory, _sf);
         }
         else
         {
-            s = new RIS(pi_new, pi_best, _factory, _sf);
-            io_debug("Rf %.2f >= %.2f, select RIS ", rf, _jp);
+            Q_ASSERT(0);
         }
 
         s->run();
