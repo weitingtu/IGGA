@@ -107,20 +107,14 @@ void Init::init_neh(const Jobs &jobs, const Factory &factory, const SeqFactory &
     t.start();
 
     NEH neh(jobs, factory, sf);
-//    Jobs pi = neh.run( jobs);
     neh.run();
-//    Jobs pi_best          = neh.get_result();
-//    unsigned pi_best_cost = neh.get_cost();
     io_debug("neh %u\n", t.restart());
 
-//    _job_sets.push_back(pi);
-//    _costs.push_back(sf.tct(pi));
     _job_sets.push_back(neh.get_result());
     _costs.push_back(neh.get_cost());
 
     _calculate_probability();
 
-//    io_debug("neh cost %u %.2f - %.2f\n", sf.tct(pi), 0.0, _cp.at(0));
     io_debug("neh cost %u %.2f - %.2f\n", neh.get_cost(), 0.0, _cp.at(0));
 }
 
