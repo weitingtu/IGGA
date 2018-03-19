@@ -25,7 +25,7 @@ public:
 
 private slots:
     void _open();
-    void _run() const;
+    void _run();
     void _verbose(bool checked) const;
 
 private:

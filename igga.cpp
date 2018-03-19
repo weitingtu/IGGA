@@ -65,19 +65,19 @@ void Init::init(const Jobs &jobs, const Factory &factory, const SeqFactory &sf)
     t.start();
     PH1 ph1(jobs, factory, sf);
     ph1.run();
-    printf("ph1 %u\n", t.restart());
+    io_debug("ph1 %u\n", t.restart());
 
     FNM fnm(jobs, factory, sf);
     fnm.run();
-    printf("fnm %u\n", t.restart());
+    io_debug("fnm %u\n", t.restart());
 
     LS ls(jobs, factory, sf);
     ls.run();
-    printf("ls  %u\n", t.restart());
+    io_debug("ls  %u\n", t.restart());
 
     CFI cfi(jobs, factory, sf);
     cfi.run();
-    printf("cfi %u\n", t.elapsed());
+    io_debug("cfi %u\n", t.elapsed());
 
     // 將所得排序存起來
     _job_sets.push_back(ph1.get_result());
@@ -107,15 +107,21 @@ void Init::init_neh(const Jobs &jobs, const Factory &factory, const SeqFactory &
     t.start();
 
     NEH neh(jobs, factory, sf);
-    Jobs pi = neh.run( jobs);
-    printf("ph1 %u\n", t.restart());
+//    Jobs pi = neh.run( jobs);
+    neh.run();
+//    Jobs pi_best          = neh.get_result();
+//    unsigned pi_best_cost = neh.get_cost();
+    io_debug("neh %u\n", t.restart());
 
-    _job_sets.push_back(pi);
-    _costs.push_back(sf.tct(pi));
+//    _job_sets.push_back(pi);
+//    _costs.push_back(sf.tct(pi));
+    _job_sets.push_back(neh.get_result());
+    _costs.push_back(neh.get_cost());
 
     _calculate_probability();
 
-    io_debug("neh cost %u %.2f - %.2f\n", sf.tct(pi), 0.0, _cp.at(0));
+//    io_debug("neh cost %u %.2f - %.2f\n", sf.tct(pi), 0.0, _cp.at(0));
+    io_debug("neh cost %u %.2f - %.2f\n", neh.get_cost(), 0.0, _cp.at(0));
 }
 
 void Init::get_best(Jobs& best, unsigned& best_cost) const
@@ -169,7 +175,7 @@ void Init::select(Jobs& pi_incumbent, std::vector<Jobs>& others)
 
     io_debug("Rf %.2f, select %s(%u) %u\n",
              rf,
-             selected_idx == 0 ? "ph1"
+             selected_idx == 0 ? "ph1/neh"
              : selected_idx == 1 ? "fnm"
              : selected_idx == 2 ? "ls" : "cfi",
              (unsigned)selected_idx,
@@ -277,7 +283,7 @@ void IGGA::run()
     }
     else
     {
-        init.init(_jobs, _factory, _sf);
+        init.init_neh(_jobs, _factory, _sf);
     }
     Jobs pi_best;
     unsigned pi_best_cost;
@@ -358,17 +364,21 @@ void IGGA::run()
 
         // 局部搜尋完所得排序pi_purown與建構完之排序pi_new做比較
         bool accept = false;
-        if(pi_purown_cost < pi_new_cost)
+        if(((LOCAL_SEARCH::NONE == _local_search) && (pi_purown_cost < pi_best_cost))
+                || pi_purown_cost < pi_new_cost)
         {
             std::vector<Jobs> r = _crossvoer(pi_purown, others);
             io_debug("pi best %u ", pi_best_cost);
-            io_debug("pi' %u ", pi_purown_cost);
-            io_debug("crossover ");
-            for(size_t i = 0; i < r.size(); ++i)
+            io_debug("pi' %u ",     pi_purown_cost);
+            if(!r.empty())
             {
-                io_debug("(%u) %u ", (unsigned)i, _sf.tct(r.at(i)));
+                io_debug("crossover ");
+                for(size_t i = 0; i < r.size(); ++i)
+                {
+                    io_debug("(%u) %u ", (unsigned)i, _sf.tct(r.at(i)));
+                }
+                io_debug("\n");
             }
-            io_debug("\n");
 
             if(pi_purown_cost < pi_best_cost)
             {
@@ -381,8 +391,7 @@ void IGGA::run()
 
             for(size_t i = 0; i < r.size(); ++i)
             {
-                _factory.add_jobs(r.at(i));
-                unsigned cost = _factory.get_cost();
+                unsigned cost = _sf.tct(r.at(i));
                 if(cost < pi_best_cost)
                 {
                     io_debug("Accept %u crossover cost %u -> %u\n", (unsigned)i, pi_best_cost, cost);
@@ -403,8 +412,8 @@ void IGGA::run()
         {
             // Try to Accept
             ++_non_improve_count;
-            if(((0 == _gamma) && _is_accept(pi_purown_cost, pi_new_cost))
-                    || ((0 != _gamma) && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
+            if(((TEMPORATURE::HATAMI == _temporature) && _is_accept(pi_purown_cost, pi_new_cost))
+                    || ((TEMPORATURE::SA == _temporature) && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
             {
                 io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
                 pi_best = pi_purown;
@@ -416,7 +425,7 @@ void IGGA::run()
             }
         }
         ++_count;
-        if(0 != _gamma && _count % _gamma == 0)
+        if(TEMPORATURE::SA == _temporature&& _count % _gamma == 0)
         {
             t = _alpha * t;
         }

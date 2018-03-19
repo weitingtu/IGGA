@@ -350,7 +350,7 @@ void MainWindow::_set_temporiture(IGGA* s) const
     }
 }
 
-void MainWindow::_run() const
+void MainWindow::_run()
 {
     QObject* s = sender();
 
@@ -376,8 +376,11 @@ void MainWindow::_run() const
 
         if(s == _igga_act)
         {
+//            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
+//                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
             scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
-                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
+                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
+                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
             _set_init_sol(dynamic_cast<IGGA*>(scheduler));
             _set_local_search(dynamic_cast<IGGA*>(scheduler));
             _set_temporiture(dynamic_cast<IGGA*>(scheduler));
@@ -446,7 +449,11 @@ void MainWindow::_run() const
         QTime t;
         t.start();
 
+
+        QString title = windowTitle();
+        setWindowTitle("Running...");
         scheduler->run();
+        setWindowTitle(title);
 
         times.push_back(t.elapsed());
 

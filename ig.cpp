@@ -3,6 +3,7 @@
 #include "consdes.h"
 #include "ls_random.h"
 #include "possibility.h"
+#include "ioApi.h"
 #include <stdlib.h>
 #include <QTime>
 
@@ -50,10 +51,15 @@ void IG::run()
 
     while( _runtime < _max_runtime)
     {
+        io_debug("Iteration %u (non-improve %u) pi best %u\n",
+                 (unsigned)_count, (unsigned)_non_improve_count, pi_best_cost);
         ConsDes consdes(_d, neh.get_result(), _factory, _sf);
         consdes.run();
         Jobs pi = consdes.get_result();
         unsigned cost = consdes.get_cost();
+        io_debug("Cons/Des %u -> %u", neh.get_cost(), cost);
+
+        io_debug("pi' %u -> \n", cost);
         if(_ls)
         {
             LSRandom ls(pi, _factory, _sf);
@@ -61,9 +67,12 @@ void IG::run()
             pi   = ls.get_result();
             cost = ls.get_cost();
         }
+        io_debug("%u\n", cost);
+
         bool accept = false;
         if(cost < pi_best_cost)
         {
+            io_debug("Accept better pi' cost %u -> %u\n", pi_best_cost, cost);
             _non_improve_count = 0;
             pi_best = pi;
             pi_best_cost = cost;
@@ -74,8 +83,13 @@ void IG::run()
             ++_non_improve_count;
             if(_is_accept(cost, pi_best_cost, t))
             {
+                io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, cost);
                 pi_best = pi;
                 pi_best_cost = cost;
+            }
+            else
+            {
+                io_debug("Don't accept bad pi'\n");
             }
         }
         ++_count;
