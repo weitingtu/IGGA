@@ -6,6 +6,11 @@ void Possibility::init()
     srand(0);
 }
 
+void Possibility::init(int s)
+{
+    srand(s);
+}
+
 std::vector<int> Possibility::KnuthShuffle( int n, int low, int up)
 {
     int size = up - low + 1;

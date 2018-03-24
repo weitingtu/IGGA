@@ -10,7 +10,9 @@ class QSpinBox;
 class QDoubleSpinBox;
 class QGroupBox;
 class QRadioButton;
+class QLineEdit;
 class IGGA;
+class Scheduler;
 
 class MainWindow : public QMainWindow
 {
@@ -37,6 +39,8 @@ private:
     QGroupBox* _create_initial_exclusive_group();
     QGroupBox* _create_local_search_exclusive_group();
     QGroupBox* _create_temporature_exclusive_group();
+    Scheduler* _create_scheduler(QObject* s, const Jobs &jobs, const Factory &factory, const SeqFactory &sf) const;
+    int _get_seed() const;
 
     void _set_init_sol(IGGA* s) const;
     void _set_local_search(IGGA* s) const;
@@ -65,6 +69,8 @@ private:
     QSpinBox* _t0_spinbox;
     QDoubleSpinBox* _alpha_spinbox;
     QSpinBox* _gamma_spinbox;
+    QSpinBox* _repeat_spinbox;
+    QLineEdit* _seed_line_edit;
     QRadioButton* _init_mul;
     QRadioButton* _init_neh;
     QRadioButton* _ls_none;

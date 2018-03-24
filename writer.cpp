@@ -25,6 +25,7 @@ Writer::Writer()
 
 void Writer::_write(FILE* fp,
                     const std::string& file_name,
+                    int seed,
                     int time,
                     unsigned iteration,
                     const Jobs& jobs,
@@ -59,6 +60,7 @@ void Writer::_write(FILE* fp,
     fprintf(fp, "Filename, %s\n",  file_name.c_str());
     fprintf(fp, "Cmax, %u\n",       c_max);
     fprintf(fp, "Sum F, %u\n",      sum_f);
+    fprintf(fp, "Seed, %d\n",       seed);
     fprintf(fp, "Time used, %d\n",  time);
     fprintf(fp, "Iterations, %u\n", iteration);
     fprintf(fp, "Run Time used, %d\n",     job_info.runtime);
@@ -77,6 +79,7 @@ void Writer::_write(FILE* fp,
 }
 
 void Writer::write(const std::string& in_name,
+                   const std::vector<int>& seeds,
                    const std::vector<int>& times,
                    const std::vector<unsigned>& iterations,
                    const std::vector<Jobs>& job_sets,
@@ -107,7 +110,7 @@ void Writer::write(const std::string& in_name,
 
     for(size_t i = 0; i < job_sets.size(); ++i)
     {
-        _write(fp, in_name, times.at(i), iterations.at(i), job_sets.at(i), job_infos.at(i));
+        _write(fp, in_name, seeds.at(i), times.at(i), iterations.at(i), job_sets.at(i), job_infos.at(i));
     }
 
     fclose(fp);

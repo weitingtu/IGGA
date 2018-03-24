@@ -27,6 +27,8 @@
 #include <QDoubleSpinBox>
 #include <QGroupBox>
 #include <QRadioButton>
+#include <QLineEdit>
+#include <time.h>
 
 static Jobs _creat_test_jobs()
 {
@@ -74,6 +76,8 @@ MainWindow::MainWindow(QWidget *parent)
       _t0_spinbox(nullptr),
       _alpha_spinbox(nullptr),
       _gamma_spinbox(nullptr),
+      _repeat_spinbox(nullptr),
+      _seed_line_edit(nullptr),
       _init_mul(nullptr),
       _init_neh(nullptr),
       _ls_none(nullptr),
@@ -205,6 +209,16 @@ void MainWindow::_create_layout()
     _gamma_spinbox->setMaximum(100);
     _gamma_spinbox->setValue(20);
 
+    _repeat_spinbox = new QSpinBox();
+    _repeat_spinbox->setPrefix("repeat: ");
+    _repeat_spinbox->setMinimum(1);
+    _repeat_spinbox->setMaximum(1000);
+    _repeat_spinbox->setValue(1);
+
+    _seed_line_edit = new QLineEdit();
+    _seed_line_edit->setValidator(new QIntValidator(0, std::numeric_limits<int>::max(), this));
+    _seed_line_edit->setPlaceholderText("random seed");
+
     QGridLayout* layout = new QGridLayout(w);
     layout->addWidget(_d_spinbox, 0, 0);
     layout->addWidget(_jp_spinbox, 1, 0);
@@ -212,10 +226,12 @@ void MainWindow::_create_layout()
     layout->addWidget(_t0_spinbox, 3, 0);
     layout->addWidget(_alpha_spinbox, 4, 0);
     layout->addWidget(_gamma_spinbox, 5, 0);
-    layout->addWidget(_create_initial_exclusive_group(), 6, 0);
-    layout->addWidget(_create_local_search_exclusive_group(), 7, 0);
-    layout->addWidget(_create_temporature_exclusive_group(), 8, 0);
-    layout->setRowStretch(9, 100);
+    layout->addWidget(_repeat_spinbox, 6, 0);
+    layout->addWidget(_seed_line_edit, 7, 0);
+    layout->addWidget(_create_initial_exclusive_group(), 8, 0);
+    layout->addWidget(_create_local_search_exclusive_group(), 9, 0);
+    layout->addWidget(_create_temporature_exclusive_group(), 10, 0);
+    layout->setRowStretch(11, 100);
     layout->setColumnStretch(1, 100);
 }
 
@@ -350,6 +366,93 @@ void MainWindow::_set_temporiture(IGGA* s) const
     }
 }
 
+Scheduler* MainWindow::_create_scheduler(QObject* s, const Jobs& jobs, const Factory& factory, const SeqFactory& sf) const
+{
+        Scheduler* scheduler = nullptr;
+        if(s == _igga_act)
+        {
+            scheduler = new IGGA(jobs, factory, sf,
+                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
+                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
+            _set_init_sol(dynamic_cast<IGGA*>(scheduler));
+            _set_local_search(dynamic_cast<IGGA*>(scheduler));
+            _set_temporiture(dynamic_cast<IGGA*>(scheduler));
+        }
+        else if(s == _igga_sa_act)
+        {
+            scheduler = new IGGA(jobs, factory, sf,
+                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
+                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
+        }
+        else if(s == _ig_act)
+        {
+            scheduler = new IG(jobs, factory, sf,
+                               _d_spinbox->value(), _t_spinbox->value(),
+                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
+        }
+        else if(s == _ig_ls_act)
+        {
+            scheduler = new IG(jobs, factory, sf,
+                               _d_spinbox->value(), _t_spinbox->value(),
+                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value(), true);
+        }
+        else if(s == _cfi_act)
+        {
+            scheduler = new CFI(jobs, factory, sf);
+        }
+        else if(s == _consdef_act)
+        {
+            scheduler = new ConsDes(_d_spinbox->value(), jobs, factory, sf);
+        }
+        else if(s == _ls_act)
+        {
+            scheduler = new LS(jobs, factory, sf);
+        }
+        else if(s == _ls_random_act)
+        {
+            scheduler = new LSRandom(jobs, factory, sf);
+        }
+        else if(s == _ph1_act)
+        {
+            scheduler = new PH1(jobs, factory, sf);
+        }
+        else if(s == _neh_act)
+        {
+            scheduler = new NEH(jobs, factory, sf);
+        }
+        else if(s == _cdjs_act)
+        {
+            scheduler = new CDJS(jobs, factory, sf);
+        }
+        else if(s == _fnm_act)
+        {
+            scheduler = new FNM(jobs, factory, sf);
+        }
+        else if(s == _ris_act)
+        {
+            scheduler = new RIS(jobs, jobs, factory, sf);
+        }
+        return scheduler;
+}
+
+int MainWindow::_get_seed() const
+{
+    QString text = _seed_line_edit->text();
+    if(text.isEmpty())
+    {
+        return (int) time(NULL);
+    }
+
+    bool ok = false;
+    int seed = text.toInt(&ok);
+    if(!ok)
+    {
+        return 0;
+    }
+
+    return seed;
+}
+
 void MainWindow::_run()
 {
     QObject* s = sender();
@@ -362,120 +465,79 @@ void MainWindow::_run()
 
     Possibility::init();
 
+    std::vector<int>      seeds;
+    std::vector<int>      run_times;
     std::vector<Jobs>     job_sets;
-    std::vector<int>      times;
     std::vector<unsigned> iterations;
     std::vector<JobInfo>  job_infos;
 
+    QString title = windowTitle();
+    setWindowTitle("Running...");
+
     for(size_t i = 0; i < _r.size();++i)
     {
-        Scheduler* scheduler = nullptr;
-
         SeqFactory sf;
         sf.init(_r.get_jobs(i));
 
-        if(s == _igga_act)
+        unsigned best_cost = std::numeric_limits<unsigned>::max();
+        int      best_seed = 0;
+        Jobs     job_result;
+        int      run_time;
+        unsigned iteration;
+        JobInfo  job_info;
+
+        int repeat_count = _repeat_spinbox->value();
+
+        for(int j = 0; j < repeat_count; ++j)
         {
-//            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
-//                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value());
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
-                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
-                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
-            _set_init_sol(dynamic_cast<IGGA*>(scheduler));
-            _set_local_search(dynamic_cast<IGGA*>(scheduler));
-            _set_temporiture(dynamic_cast<IGGA*>(scheduler));
-        }
-        else if(s == _igga_sa_act)
-        {
-            scheduler = new IGGA(_r.get_jobs(i), _r.get_factory(i), sf,
-                                 _d_spinbox->value(), _jp_spinbox->value(), _t_spinbox->value(),
-                                 _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
-        }
-        else if(s == _ig_act)
-        {
-            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i), sf,
-                               _d_spinbox->value(), _t_spinbox->value(),
-                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value());
-        }
-        else if(s == _ig_ls_act)
-        {
-            scheduler = new IG(_r.get_jobs(i), _r.get_factory(i), sf,
-                               _d_spinbox->value(), _t_spinbox->value(),
-                               _t0_spinbox->value(), _alpha_spinbox->value(), _gamma_spinbox->value(), true);
-        }
-        else if(s == _cfi_act)
-        {
-            scheduler = new CFI(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _consdef_act)
-        {
-            scheduler = new ConsDes(_d_spinbox->value(), _r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _ls_act)
-        {
-            scheduler = new LS(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _ls_random_act)
-        {
-            scheduler = new LSRandom(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _ph1_act)
-        {
-            scheduler = new PH1(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _neh_act)
-        {
-            scheduler = new NEH(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _cdjs_act)
-        {
-            scheduler = new CDJS(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _fnm_act)
-        {
-            scheduler = new FNM(_r.get_jobs(i), _r.get_factory(i), sf);
-        }
-        else if(s == _ris_act)
-        {
-            scheduler = new RIS(_r.get_jobs(i), _r.get_jobs(i), _r.get_factory(i), sf);
+            int seed = _get_seed();
+            Possibility::init(seed);
+
+            Scheduler* scheduler = _create_scheduler(s, _r.get_jobs(i), _r.get_factory(i), sf);
+
+            if(nullptr == scheduler)
+            {
+                printf("warn: failed to run scheduler\n");
+                return;
+            }
+
+            QTime t;
+            t.start();
+
+            scheduler->run();
+
+            if(scheduler->get_cost() < best_cost)
+            {
+                best_seed  = seed;
+                run_time   = t.elapsed();
+                job_result = scheduler->get_result();
+                iteration  = scheduler->get_count();
+                job_info =
+                {scheduler->get_count(),
+                 scheduler->get_non_improve_count(),
+                 scheduler->get_convergence_count(),
+                 scheduler->get_runtime(),
+                 scheduler->get_convergence_time(),
+                 scheduler->get_max_runtime()
+                            };
+            }
+            delete scheduler;
+            scheduler = nullptr;
         }
 
-        if(nullptr == scheduler)
-        {
-            printf("warn: failed to run scheduler\n");
-            return;
-        }
-
-        QTime t;
-        t.start();
-
-
-        QString title = windowTitle();
-        setWindowTitle("Running...");
-        scheduler->run();
-        setWindowTitle(title);
-
-        times.push_back(t.elapsed());
-
-        job_sets.push_back(scheduler->get_result());
-        iterations.push_back(scheduler->get_count());
-        job_infos.push_back(
-        {scheduler->get_count(),
-         scheduler->get_non_improve_count(),
-         scheduler->get_convergence_count(),
-         scheduler->get_runtime(),
-         scheduler->get_convergence_time(),
-         scheduler->get_max_runtime()
-                    });
-        delete scheduler;
-        scheduler = nullptr;
+        seeds.push_back(best_seed);
+        run_times.push_back(run_time);
+        job_sets.push_back(job_result);
+        iterations.push_back(iteration);
+        job_infos.push_back(job_info);
     }
 
+    setWindowTitle(title);
 
     QFileInfo file_info(QString(_r.get_file_name().c_str()));
 
     Writer w;
-    w.write( file_info.fileName().toLatin1().data(), times, iterations, job_sets, job_infos );
+    w.write( file_info.fileName().toLatin1().data(), seeds, run_times, iterations, job_sets, job_infos );
 }
 
 void MainWindow::_test_cost_function() const

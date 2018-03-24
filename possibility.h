@@ -7,6 +7,7 @@ class Possibility
 {
 public:
     static void init();
+    static void init(int s);
     static std::vector<int> KnuthShuffle( int n, int low, int up);
 };
 
