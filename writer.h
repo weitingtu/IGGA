@@ -18,12 +18,12 @@ class Writer
 public:
     Writer();
 
-    void write(const std::string&in_name, const std::vector<int> &seeds, const std::vector<int> &times,
+    void write(const std::string&in_name, const std::vector<int> &seeds, const std::vector<unsigned> &ave_costs, const std::vector<unsigned> &worst_costs, const std::vector<int> &times,
                const std::vector<unsigned> &iterations,
                const std::vector<Jobs> &job_sets, const std::vector<JobInfo>& job_infos) const;
 
 private:
-    void _write(FILE* fp, const std::__cxx11::string &file_name, int seed, int time, unsigned iteration, const Jobs& jobs, const JobInfo &job_info) const;
+    void _write(FILE* fp, const std::__cxx11::string &file_name, int seed, unsigned ave_cost, unsigned worst_cost, int time, unsigned iteration, const Jobs& jobs, const JobInfo &job_info) const;
 };
 
 #endif // WRITER_H

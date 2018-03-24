@@ -466,6 +466,8 @@ void MainWindow::_run()
     Possibility::init();
 
     std::vector<int>      seeds;
+    std::vector<unsigned> ave_costs;
+    std::vector<unsigned> worst_costs;
     std::vector<int>      run_times;
     std::vector<Jobs>     job_sets;
     std::vector<unsigned> iterations;
@@ -479,8 +481,10 @@ void MainWindow::_run()
         SeqFactory sf;
         sf.init(_r.get_jobs(i));
 
-        unsigned best_cost = std::numeric_limits<unsigned>::max();
-        int      best_seed = 0;
+        unsigned best_cost  = std::numeric_limits<unsigned>::max();
+        unsigned total_cost = 0;
+        unsigned worst_cost = 0;
+        int      best_seed  = 0;
         Jobs     job_result;
         int      run_time;
         unsigned iteration;
@@ -506,8 +510,10 @@ void MainWindow::_run()
 
             scheduler->run();
 
+            total_cost += scheduler->get_cost();
             if(scheduler->get_cost() < best_cost)
             {
+                best_cost  = scheduler->get_cost();
                 best_seed  = seed;
                 run_time   = t.elapsed();
                 job_result = scheduler->get_result();
@@ -521,11 +527,17 @@ void MainWindow::_run()
                  scheduler->get_max_runtime()
                             };
             }
+            if(scheduler->get_cost() > worst_cost)
+            {
+                worst_cost  = scheduler->get_cost();
+            }
             delete scheduler;
             scheduler = nullptr;
         }
 
         seeds.push_back(best_seed);
+        ave_costs.push_back(total_cost / repeat_count);
+        worst_costs.push_back(worst_cost);
         run_times.push_back(run_time);
         job_sets.push_back(job_result);
         iterations.push_back(iteration);
@@ -537,7 +549,9 @@ void MainWindow::_run()
     QFileInfo file_info(QString(_r.get_file_name().c_str()));
 
     Writer w;
-    w.write( file_info.fileName().toLatin1().data(), seeds, run_times, iterations, job_sets, job_infos );
+    w.write( file_info.fileName().toLatin1().data(),
+             seeds, ave_costs, worst_costs,
+             run_times, iterations, job_sets, job_infos );
 }
 
 void MainWindow::_test_cost_function() const

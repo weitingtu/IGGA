@@ -26,6 +26,8 @@ Writer::Writer()
 void Writer::_write(FILE* fp,
                     const std::string& file_name,
                     int seed,
+                    unsigned ave_cost,
+                    unsigned worst_cost,
                     int time,
                     unsigned iteration,
                     const Jobs& jobs,
@@ -57,9 +59,11 @@ void Writer::_write(FILE* fp,
         sum_f += jobs.at(i).machine_times.back();
     }
 
-    fprintf(fp, "Filename, %s\n",  file_name.c_str());
-    fprintf(fp, "Cmax, %u\n",       c_max);
-    fprintf(fp, "Sum F, %u\n",      sum_f);
+    fprintf(fp, "Filename, %s\n",      file_name.c_str());
+    fprintf(fp, "Cmax, %u\n",          c_max);
+    fprintf(fp, "Sum F, %u\n",         sum_f);
+    fprintf(fp, "Average Sum F, %u\n", ave_cost);
+    fprintf(fp, "Worst Sum F, %u\n",   worst_cost);
     fprintf(fp, "Seed, %d\n",       seed);
     fprintf(fp, "Time used, %d\n",  time);
     fprintf(fp, "Iterations, %u\n", iteration);
@@ -80,6 +84,8 @@ void Writer::_write(FILE* fp,
 
 void Writer::write(const std::string& in_name,
                    const std::vector<int>& seeds,
+                   const std::vector<unsigned>& ave_costs,
+                   const std::vector<unsigned>& worst_costs,
                    const std::vector<int>& times,
                    const std::vector<unsigned>& iterations,
                    const std::vector<Jobs>& job_sets,
@@ -110,7 +116,9 @@ void Writer::write(const std::string& in_name,
 
     for(size_t i = 0; i < job_sets.size(); ++i)
     {
-        _write(fp, in_name, seeds.at(i), times.at(i), iterations.at(i), job_sets.at(i), job_infos.at(i));
+        _write(fp, in_name,
+               seeds.at(i), ave_costs.at(i), worst_costs.at(i),
+               times.at(i), iterations.at(i), job_sets.at(i), job_infos.at(i));
     }
 
     fclose(fp);
