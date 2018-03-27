@@ -267,6 +267,11 @@ void IGGA::run()
         return;
     }
 
+    int init_run_time  = 0;
+    int cd_run_time    = 0;
+    int ls_run_time    = 0;
+    int cross_run_time = 0;
+
     QTime time;
     time.start();
 
@@ -279,6 +284,12 @@ void IGGA::run()
     {
         init.init_neh(_jobs, _factory, _sf);
     }
+
+    int t1 = 0;
+    int t2 = time.elapsed();
+    init_run_time += t2 - t1;
+    t1 = t2;
+
     Jobs pi_best;
     unsigned pi_best_cost;
     init.get_best(pi_best, pi_best_cost);
@@ -296,8 +307,10 @@ void IGGA::run()
 
     while( _runtime < _max_runtime)
     {
+        t2 = time.elapsed();
         io_debug("Iteration %u (non-improve %u) pi best %u\n",
-                 (unsigned)_count, (unsigned)_non_improve_count, pi_best_cost);
+                 (unsigned)_count, (unsigned)_non_improve_count, pi_best_cost, t2 - t1);
+        t1 = t2;
         Jobs pi_incumbent;
         std::vector<Jobs> others;
         init.select(pi_incumbent, others);
@@ -308,7 +321,10 @@ void IGGA::run()
 
         Jobs pi_new = consdes.get_result();
         unsigned pi_new_cost = consdes.get_cost();
-        io_debug("Cons/Des %u -> %u\n", _sf.tct(pi_incumbent), pi_new_cost);
+        t2 = time.elapsed();
+        io_debug("Cons/Des %u -> %u\n", _sf.tct(pi_incumbent), pi_new_cost, t2 - t1);
+        cd_run_time += t2 - t1;
+        t1 = t2;
 
         // Local search
         Scheduler* s = nullptr;
@@ -354,14 +370,20 @@ void IGGA::run()
         delete s;
         s = nullptr;
 
+        t2 = time.elapsed();
         io_debug("pi' %u -> %u\n", pi_new_cost, pi_purown_cost);
+        ls_run_time += t2 - t1;
+        t1 = t2;
 
         // 局部搜尋完所得排序pi_purown與建構完之排序pi_new做比較
         bool accept = false;
         if(((LOCAL_SEARCH::NONE == _local_search) && (pi_purown_cost < pi_best_cost))
                 || pi_purown_cost < pi_new_cost)
         {
+            t2 = time.elapsed();
             std::vector<Jobs> r = _crossvoer(pi_purown, others);
+            cross_run_time += t2 - t1;
+            t1 = t2;
             io_debug("pi best %u ", pi_best_cost);
             io_debug("pi' %u ",     pi_purown_cost);
             if(!r.empty())
@@ -409,7 +431,7 @@ void IGGA::run()
             if(((TEMPORATURE::HATAMI == _temporature) && _is_accept(pi_purown_cost, pi_new_cost))
                     || ((TEMPORATURE::SA == _temporature) && _is_sa_accept(pi_purown_cost, pi_new_cost, t)))
             {
-                io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost);
+                io_debug("Accept bad pi' cost %u -> %u\n", pi_best_cost, pi_purown_cost );
                 pi_best = pi_purown;
                 pi_best_cost = pi_purown_cost;
             }
@@ -423,6 +445,8 @@ void IGGA::run()
         {
             t = _alpha * t;
         }
+        t1 = 0;
+        t2 = 0;
         _runtime +=time.restart();
         if(accept)
         {
@@ -436,6 +460,10 @@ void IGGA::run()
     _runtime += time.restart();
 
     printf("summary\n");
+    printf("  init run time     : %d\n", init_run_time);
+    printf("  cons/des run time : %d\n", cd_run_time);
+    printf("  local search run time : %d\n", ls_run_time);
+    printf("  cross run time    : %d\n", cross_run_time);
     printf("  count             : %u\n", _count);
     printf("  non-improve count : %u\n", _non_improve_count);
     printf("  convergence count : %u\n", _convergence_count);
