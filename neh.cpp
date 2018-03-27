@@ -19,17 +19,18 @@ void NEH::run()
 
 Jobs NEH::run(const Jobs& pi1)
 {
-    Jobs pi2;
+    JobsSeq pi2;
     for(size_t i = 0; i < pi1.size(); ++i)
     {
-        Jobs best;
+        JobsSeq best;
         unsigned min_cost = std::numeric_limits<unsigned>::max();
         for(size_t pos = 0; ;++pos)
         {
-            auto ite = pi2.begin() + pos;
+            auto ite = pi2.begin();
+            std::advance(ite, pos);
             ite = pi2.insert(ite, pi1[i]);
 
-            unsigned cost = _sf.tct(pi2);
+            unsigned cost = _sf.seq_tct(pi2);
 
             if(cost < min_cost)
             {
@@ -46,5 +47,5 @@ Jobs NEH::run(const Jobs& pi1)
         }
         pi2 = best;
     }
-    return pi2;
+    return Jobs(pi2.begin(), pi2.end());
 }
