@@ -26,18 +26,18 @@ Jobs NEH::run(const Jobs& pi1)
         unsigned min_cost = std::numeric_limits<unsigned>::max();
         for(size_t pos = 0; ;++pos)
         {
-            Jobs tmp = pi2;
-            auto ite = tmp.begin() + pos;
-            tmp.insert(ite, pi1[i]);
+            auto ite = pi2.begin() + pos;
+            ite = pi2.insert(ite, pi1[i]);
 
-            _factory.add_jobs(tmp);
-            unsigned cost = _factory.get_cost();
+            unsigned cost = _sf.tct(pi2);
 
             if(cost < min_cost)
             {
                 min_cost = cost;
-                best = tmp;
+                best = pi2;
             }
+
+            pi2.erase(ite);
 
             if(pos == pi2.size())
             {
@@ -46,5 +46,5 @@ Jobs NEH::run(const Jobs& pi1)
         }
         pi2 = best;
     }
-    return _factory.get_jobs();
+    return pi2;
 }

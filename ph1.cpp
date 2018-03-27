@@ -20,7 +20,6 @@ Jobs PH1::_isa()
 
     Jobs pi2(1, *(pi1.begin()));
     pi1.erase(pi1.begin());
-    _factory.add_jobs(pi2);
 
     while(!pi1.empty())
     {
@@ -31,8 +30,7 @@ Jobs PH1::_isa()
         {
             Jobs tmp = pi2;
             tmp.push_back(*ite);
-            _factory.add_jobs(tmp);
-            unsigned cost = _factory.get_cost();
+            unsigned cost = _sf.tct(tmp);
             if(cost < min_cost)
             {
                 min_ite = ite;
@@ -42,19 +40,15 @@ Jobs PH1::_isa()
         }
         pi1.erase(min_ite);
         pi2 = best;
-        _factory.add_jobs(pi2);
     }
-    _factory.add_jobs(pi2);
 
     return pi2;
 }
 
 Jobs PH1::_neh(Jobs pi)
 {
-    _factory.add_jobs(pi);
-
     Jobs best = pi;
-    unsigned min_cost = _factory.get_cost();
+    unsigned min_cost = _sf.tct(pi);
 
     NEH neh(pi, _factory, _sf);
 
@@ -63,8 +57,7 @@ Jobs PH1::_neh(Jobs pi)
     {
        ++r;
        pi = neh.run( pi );
-       _factory.add_jobs( pi );
-       unsigned cost = _factory.get_cost();
+       unsigned cost = _sf.tct(pi);
        if(cost < min_cost)
        {
            min_cost = cost;
@@ -77,18 +70,18 @@ Jobs PH1::_neh(Jobs pi)
 
 Jobs PH1::_pair_wise_exchange(Jobs pi)
 {
-    _factory.add_jobs(pi);
-    unsigned min_cost = _factory.get_cost();
+    unsigned min_cost = _sf.tct(pi);
     for(size_t i = 0; i < pi.size() - 1; ++i)
     {
-        Jobs tmp = pi;
-        std::swap(tmp.at(i), tmp.at(i + 1));
-        _factory.add_jobs(tmp);
-        unsigned cost = _factory.get_cost();
+        std::swap(pi.at(i), pi.at(i + 1));
+        unsigned cost = _sf.tct(pi);
         if(cost < min_cost)
         {
-            pi = tmp;
             min_cost = cost;
+        }
+        else
+        {
+            std::swap(pi.at(i + 1), pi.at(i));
         }
     }
     return pi;
